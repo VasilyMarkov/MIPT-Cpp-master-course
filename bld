@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+cmake -S . -B build
+time cmake --build build --parallel 4
