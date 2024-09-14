@@ -8,8 +8,6 @@ endif()
 
 add_executable(cowString main.cpp)
 
-# target_include_directories(cowString PRIVATE ${CMAKE_SOURCE_DIR})
-
 target_compile_features(cowString PUBLIC cxx_std_23)
 
-# add_subdirectory(test)
+add_subdirectory(test)
