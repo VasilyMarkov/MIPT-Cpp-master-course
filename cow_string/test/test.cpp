@@ -37,21 +37,22 @@ TEST(Iterator, it_postfix_increment) {
     EXPECT_EQ(*cStr.begin()++, 'a');
 }
 
-TEST(Iterator, it_prefix_decrement) {
-    my_impl::CowString cStr("abcde");
-    EXPECT_EQ(*--cStr.end(), 'e');
-}
-
-TEST(Iterator, it_postfix_decrement) {
-    my_impl::CowString cStr("abcde");
-    auto it = --cStr.end();
-    EXPECT_EQ(*it--, 'e');
-}
-
 TEST(cowString, compare) {
     my_impl::CowString cStr1("hello");
     my_impl::CowString cStr2("hello");
     EXPECT_EQ(cStr1, cStr2);
+}
+
+TEST(cowString, copyCtr) {
+    my_impl::CowString cStr1("hello");
+    my_impl::CowString cStr2(cStr1);
+    EXPECT_EQ(cStr1, cStr2);
+}
+
+TEST(cowString, moveCtr) {
+    my_impl::CowString cStr1("hello");
+    my_impl::CowString cStr2(std::move(cStr1));
+    EXPECT_EQ(cStr2, "hello");
 }
 
 int main(int argc, char **argv) {

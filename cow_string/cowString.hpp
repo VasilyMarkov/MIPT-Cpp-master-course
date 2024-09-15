@@ -7,7 +7,8 @@
 #include <cstring>
 #include <iterator> 
 #include <cstddef>  
-
+#include <memory>
+#include <vector>
 namespace my_impl {
 
 template <typename T, typename U>
@@ -15,36 +16,37 @@ requires(std::same_as<T, std::decay_t<U>>)
 void construct(T* ptr, U&& rhs) noexcept(noexcept(U{})) 
 {new (ptr) T(std::forward<U>(rhs));}
 
-template<typename T> void destroy(T* ptr) {ptr->~T();}
+template<typename T> void destroy(T* ptr) noexcept {ptr->~T();}
 
-template<std::random_access_iterator It> void destroy(It begin, It end) noexcept {
+template<std::forward_iterator It> void destroy(It begin, It end) noexcept {
     while(begin != end) {
         destroy(&*begin++);
     }
 }
 
-template <class T>
+template <typename T>
 struct Iterator final {
     using iterator_category = std::forward_iterator_tag;
     using difference_type   = std::ptrdiff_t;
     using value_type        = T;
-    using pointer           = T*;  
-    using reference         = T&;  
+    using pointer           = T*;
+    using reference         = T&;
 
-    constexpr Iterator() noexcept {};
+    constexpr Iterator(){};
     constexpr explicit Iterator(pointer ptr) noexcept: ptr_(ptr) {}
     constexpr Iterator(const Iterator& itr) noexcept: ptr_(itr.ptr_) {}
     constexpr Iterator& operator=(const Iterator& itr) noexcept {ptr_ = itr.ptr_;}
     ~Iterator(){}
 
-    constexpr const reference operator*() const {return *ptr_;}
-    constexpr reference operator*() {return *ptr_;}
+    constexpr reference operator*() const {return *ptr_;}
     constexpr pointer operator->() const {return ptr_;}
 
     constexpr Iterator& operator++() {ptr_++; return *this;}
     constexpr Iterator operator++(int) {Iterator tmp = *this; ++(*this); return tmp;}
-    constexpr Iterator& operator--() {ptr_--; return *this;}
-    constexpr Iterator operator--(int) {Iterator tmp = *this; --(*this); return tmp;}
+    constexpr Iterator& operator+=(difference_type n) noexcept {ptr_ += n; return *this;}
+    constexpr Iterator operator+(difference_type n) const noexcept {Iterator res(*this); return res += n;}
+
+    friend Iterator operator+(difference_type n, const Iterator& it) noexcept {return it += n;}
 
     friend bool operator==(const Iterator& lhs, const Iterator& rhs) {return lhs.ptr_ == rhs.ptr_;}
     friend bool operator!=(const Iterator& lhs, const Iterator& rhs) {return lhs.ptr_ != rhs.ptr_;}
@@ -54,7 +56,7 @@ private:
 };
 
 
-template <class T>
+template <typename T>
 struct bufCowString 
 {
 protected:
@@ -102,35 +104,27 @@ struct CowString final: private bufCowString<CharT>
     using const_iterator = const Iterator<CharT>;
 
     inline iterator begin() noexcept { return iterator(&data_[0]); }
-    inline const_iterator cbegin() noexcept { return const_iterator(&data_[0]); }
-    inline iterator end() noexcept { return iterator(&data_[size_]); }
-    inline const_iterator cend() noexcept { return const_iterator(&data_[size_]); }
+    inline const_iterator cbegin() const noexcept { return const_iterator(&data_[0]); }
+    inline iterator end() noexcept { return iterator(&data_[used_]); }
+    inline const_iterator cend() const noexcept { return const_iterator(&data_[used_]); }
 
     explicit CowString(size_t n = 0): bufCowString<CharT>(n) {}
 
     CowString(const CharT* str): bufCowString<CharT>(Traits::length(str))    
     {
-        while(used_ < Traits::length(str)) {
-            construct(data_ + used_, str[used_]);
-            ++used_;
-        }
+        used_ = Traits::length(str);
+        std::uninitialized_copy(str, str+Traits::length(str), begin());
     }
 
-    // template<typename It> CowString(It begin, It end): 
-    //     bufCowString<T>(std::distance(begin, end)) 
-    // {
-    //     while(begin != end) {
-    //         auto it = *begin++;
-    //         construct(data_ + used_++, std::move(it));
-    //     }
-    // }
-
-    CowString(const CowString& rhs): bufCowString<CharT>(rhs.used_)
+    CowString(const CowString& rhs): bufCowString<CharT>(rhs.size_)
     {
-        while(used_ < rhs.used_) {
-            construct(data_+used_, std::move(rhs.data_[used_]));
-            used_++;
-        }
+        used_ = rhs.used_;
+        std::uninitialized_copy(rhs.cbegin(), rhs.cbegin()+rhs.used_, begin());
+    }
+
+    CowString(CowString&& rhs) noexcept: bufCowString<CharT>(rhs.size_) {
+        std::swap(data_, rhs.data_);
+        std::swap(used_, rhs.used_);
     }
 
     ~CowString() 
@@ -139,7 +133,7 @@ struct CowString final: private bufCowString<CharT>
     }
     
     constexpr size_t size() const noexcept {
-        return size_;
+        return used_;
     }
 
     constexpr auto operator==(const CowString& rhs) const {
