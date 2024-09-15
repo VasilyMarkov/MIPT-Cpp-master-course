@@ -88,7 +88,7 @@ protected:
 
     ~bufCowString() 
     {
-        destroy(data_, data_ + used_);
+        std::destroy(data_, data_ + used_);
         ::operator delete(data_);
     };
 };
@@ -122,25 +122,44 @@ struct CowString final: private bufCowString<CharT>
         std::uninitialized_copy(rhs.cbegin(), rhs.cbegin()+rhs.used_, begin());
     }
 
-    CowString(CowString&& rhs) noexcept: bufCowString<CharT>(rhs.size_) {
+    CowString(CowString&& rhs) noexcept: bufCowString<CharT>(rhs.size_) 
+    {
         std::swap(data_, rhs.data_);
         std::swap(used_, rhs.used_);
     }
 
-    ~CowString() 
+    CowString& operator=(const CowString& rhs) 
     {
+        if(this == &rhs) return *this;    
 
+        CowString tmp(rhs);
+        std::swap(*this, tmp);
+
+        return *this;
     }
+
+    CowString& operator=(CowString&& rhs) noexcept 
+    {
+        std::swap(data_, rhs.data_);
+        std::swap(size_, rhs.size_);
+        std::swap(used_, rhs.used_);
+        return *this;
+    }
+
+    ~CowString() {}
     
-    constexpr size_t size() const noexcept {
+    constexpr size_t size() const noexcept 
+    {
         return used_;
     }
 
-    constexpr auto operator==(const CowString& rhs) const {
+    constexpr auto operator==(const CowString& rhs) const 
+    {
         return Traits::compare(data_, rhs.data_, std::min(size_, rhs.size_)) == 0;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const CowString& string) {
+    friend std::ostream& operator<<(std::ostream& os, const CowString& string) 
+    {
         for(size_t i = 0; i < string.size_; ++i) os << string.data_[i];
         return os;
     }

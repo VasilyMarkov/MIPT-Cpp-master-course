@@ -38,21 +38,35 @@ TEST(Iterator, it_postfix_increment) {
 }
 
 TEST(cowString, compare) {
-    my_impl::CowString cStr1("hello");
-    my_impl::CowString cStr2("hello");
+    my_impl::CowString cStr1("abcde");
+    my_impl::CowString cStr2("abcde");
     EXPECT_EQ(cStr1, cStr2);
 }
 
 TEST(cowString, copyCtr) {
-    my_impl::CowString cStr1("hello");
+    my_impl::CowString cStr1("abcde");
     my_impl::CowString cStr2(cStr1);
     EXPECT_EQ(cStr1, cStr2);
 }
 
 TEST(cowString, moveCtr) {
-    my_impl::CowString cStr1("hello");
+    my_impl::CowString cStr1("abcde");
     my_impl::CowString cStr2(std::move(cStr1));
-    EXPECT_EQ(cStr2, "hello");
+    EXPECT_EQ(cStr2, "abcde");
+}
+
+TEST(cowString, copyAssign) {
+    my_impl::CowString cStr1("abcde");
+    my_impl::CowString cStr2("vwxyz");
+    cStr1 = cStr2;
+    EXPECT_EQ(cStr1, "vwxyz");
+}
+
+TEST(cowString, moveAssign) {
+    my_impl::CowString cStr1("abcde");
+    my_impl::CowString cStr2("vwxyz");
+    cStr1 = std::move(cStr2);
+    EXPECT_EQ(cStr1, "vwxyz");
 }
 
 int main(int argc, char **argv) {
