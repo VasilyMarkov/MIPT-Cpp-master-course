@@ -9,6 +9,7 @@
 #include <cstddef>  
 #include <memory>
 #include <vector>
+
 namespace my_impl {
 
 template <typename T, typename U>
@@ -94,77 +95,64 @@ protected:
 };
 
 template<class CharT, class Traits = std::char_traits<CharT>> 
-struct CowString final: private bufCowString<CharT> 
+struct basicCowString final
 {
-    using bufCowString<CharT>::used_;
-    using bufCowString<CharT>::size_;
-    using bufCowString<CharT>::data_;
-
-    using iterator = Iterator<CharT>;
-    using const_iterator = const Iterator<CharT>;
-
-    inline iterator begin() noexcept { return iterator(&data_[0]); }
-    inline const_iterator cbegin() const noexcept { return const_iterator(&data_[0]); }
-    inline iterator end() noexcept { return iterator(&data_[used_]); }
-    inline const_iterator cend() const noexcept { return const_iterator(&data_[used_]); }
-
-    explicit CowString(size_t n = 0): bufCowString<CharT>(n) {}
-
-    CowString(const CharT* str): bufCowString<CharT>(Traits::length(str))    
+    explicit basicCowString(const CharT* str):ptr_data_(std::make_shared<buffer>(Traits::length(str)))
     {
-        used_ = Traits::length(str);
-        std::uninitialized_copy(str, str+Traits::length(str), begin());
+        std::copy(str, str + Traits::length(str), std::begin(*ptr_data_));
     }
 
-    CowString(const CowString& rhs): bufCowString<CharT>(rhs.size_)
+    basicCowString(const basicCowString& rhs) noexcept = default;
+    basicCowString& operator=(const basicCowString& rhs) noexcept = default;
+
+    basicCowString(basicCowString&& rhs) noexcept
     {
-        used_ = rhs.used_;
-        std::uninitialized_copy(rhs.cbegin(), rhs.cbegin()+rhs.used_, begin());
+        std::swap(ptr_data_, rhs.ptr_data_);
     }
 
-    CowString(CowString&& rhs) noexcept: bufCowString<CharT>(rhs.size_) 
+    basicCowString& operator=(basicCowString&& rhs) noexcept 
     {
-        std::swap(data_, rhs.data_);
-        std::swap(used_, rhs.used_);
-    }
-
-    CowString& operator=(const CowString& rhs) 
-    {
-        if(this == &rhs) return *this;    
-
-        CowString tmp(rhs);
-        std::swap(*this, tmp);
-
+        std::swap(ptr_data_, rhs.ptr_data_);
         return *this;
     }
 
-    CowString& operator=(CowString&& rhs) noexcept 
+    ~basicCowString() {}
+
+    size_t size() const noexcept {return ptr_data_->size();}
+
+
+    friend constexpr bool operator==(const basicCowString& lhs, const basicCowString& rhs) 
     {
-        std::swap(data_, rhs.data_);
-        std::swap(size_, rhs.size_);
-        std::swap(used_, rhs.used_);
-        return *this;
+        return lhs.size() == rhs.size() && !Traits::compare(lhs.ptr_data_->data(), rhs.ptr_data_->data(), lhs.size());
     }
 
-    ~CowString() {}
-    
-    constexpr size_t size() const noexcept 
+    friend constexpr bool operator==(const basicCowString& lhs, const CharT* rhs) 
     {
-        return used_;
+        return lhs.size() == Traits::length(rhs) && !Traits::compare(lhs.ptr_data_->data(), rhs, lhs.size());
     }
 
-    constexpr auto operator==(const CowString& rhs) const 
-    {
-        return Traits::compare(data_, rhs.data_, std::min(size_, rhs.size_)) == 0;
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const CowString& string) 
-    {
-        for(size_t i = 0; i < string.size_; ++i) os << string.data_[i];
-        return os;
-    }
+    // friend std::ostream& operator<<(std::ostream& os, const basicCowString& string) 
+    // {
+    //     for(auto&& el : *string.ptr_data_) os << el;
+    //     return os;
+    // }
+private:
+    using buffer = std::vector<CharT>;
+    std::shared_ptr<buffer> ptr_data_;
 };
 
+using cowString     = basicCowString<char>; 
+using u8CowString   = basicCowString<char8_t>; 
+using u16CowString  = basicCowString<char16_t>; 
+using u32CowString  = basicCowString<char32_t>; 
+using wCowString    = basicCowString<wchar_t>; 
+
+template <typename T, std::size_t N>
+basicCowString<T> makeString(const std::array<T, N>& constexpr_str) {return basicCowString(constexpr_str.data());}
+
 }
+
+
+
 
 #endif //COW_STRING_H
