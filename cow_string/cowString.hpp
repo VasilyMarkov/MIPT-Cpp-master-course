@@ -9,6 +9,8 @@
 #include <cstddef>  
 #include <memory>
 #include <vector>
+#include <codecvt>
+#include <locale>
 
 namespace my_impl {
 
@@ -94,12 +96,29 @@ protected:
     };
 };
 
-template<class CharT, class Traits = std::char_traits<CharT>> 
+template<typename CharT, typename Traits = std::char_traits<CharT>> 
+requires std::is_same_v<CharT, char>     || 
+         std::is_same_v<CharT, char8_t>  ||
+         std::is_same_v<CharT, char16_t> ||
+         std::is_same_v<CharT, char32_t> ||
+         std::is_same_v<CharT, wchar_t>
 struct basicCowString final
 {
-    explicit basicCowString(const CharT* str):ptr_data_(std::make_shared<buffer>(Traits::length(str)))
+    basicCowString() = default;
+
+    explicit basicCowString(const CharT* str):
+        ptr_data_(std::make_shared<buffer>(Traits::length(str))), 
+        size_(Traits::length(str))
     {
         std::copy(str, str + Traits::length(str), std::begin(*ptr_data_));
+    }
+
+    template <std::contiguous_iterator Iter>
+    basicCowString(Iter begin, Iter end):
+        ptr_data_(std::make_shared<buffer>(std::distance(begin, end))),
+        size_(ptr_data_->size())
+    { 
+        std::copy(begin, end, std::begin(*ptr_data_));
     }
 
     basicCowString(const basicCowString& rhs) noexcept = default;
@@ -108,18 +127,31 @@ struct basicCowString final
     basicCowString(basicCowString&& rhs) noexcept
     {
         std::swap(ptr_data_, rhs.ptr_data_);
+        std::swap(size_, rhs.size_);
     }
 
     basicCowString& operator=(basicCowString&& rhs) noexcept 
     {
         std::swap(ptr_data_, rhs.ptr_data_);
+        std::swap(size_, rhs.size_);
         return *this;
     }
 
-    ~basicCowString() {}
+    ~basicCowString() = default;
 
-    size_t size() const noexcept {return ptr_data_->size();}
+    size_t size() const noexcept {return size_;}
 
+    bool unique() const noexcept {return ptr_data_.unique();}
+
+    basicCowString substr(size_t begin, size_t end) const {
+        if(begin == end) return basicCowString{};
+
+        if(end < begin) throw std::length_error("invalid iterator range");
+
+        basicCowString tmp(std::begin(*ptr_data_)+begin, std::begin(*ptr_data_)+end);
+        tmp.detach();
+        return tmp;
+    }
 
     friend constexpr bool operator==(const basicCowString& lhs, const basicCowString& rhs) 
     {
@@ -131,14 +163,24 @@ struct basicCowString final
         return lhs.size() == Traits::length(rhs) && !Traits::compare(lhs.ptr_data_->data(), rhs, lhs.size());
     }
 
-    // friend std::ostream& operator<<(std::ostream& os, const basicCowString& string) 
-    // {
-    //     for(auto&& el : *string.ptr_data_) os << el;
-    //     return os;
-    // }
+    friend std::ostream& operator<<(std::ostream& os, const basicCowString& string) 
+    {
+        for(auto&& el : *string.ptr_data_) os << el;
+        return os;
+    }
 private:
+
+    void detach() {
+        if(!ptr_data_.unique()) {
+            auto new_ptr_data_ = std::make_unique<buffer>(ptr_data_->size());
+            std::copy(std::begin(*ptr_data_), std::end(*ptr_data_), std::begin(*new_ptr_data_));
+            ptr_data_ = std::move(new_ptr_data_);
+        }
+    }
+
     using buffer = std::vector<CharT>;
-    std::shared_ptr<buffer> ptr_data_;
+    std::shared_ptr<buffer> ptr_data_ = nullptr;
+    size_t size_ = 0;
 };
 
 using cowString     = basicCowString<char>; 
