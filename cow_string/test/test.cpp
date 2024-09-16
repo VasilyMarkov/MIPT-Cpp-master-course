@@ -11,6 +11,7 @@ public:
 };
 
 using charTypes = ::testing::Types<char, char16_t, char32_t, wchar_t>;
+// using charTypes = ::testing::Types<char>;
 
 TYPED_TEST_SUITE(TypedCowStringTest, charTypes);
 

@@ -163,11 +163,11 @@ struct basicCowString final
         return lhs.size() == Traits::length(rhs) && !Traits::compare(lhs.ptr_data_->data(), rhs, lhs.size());
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const basicCowString& string) 
-    {
-        for(auto&& el : *string.ptr_data_) os << el;
-        return os;
-    }
+    // friend std::ostream& operator<<(std::ostream& os, const basicCowString& string) 
+    // {
+    //     for(auto&& el : *string.ptr_data_) os << el;
+    //     return os;
+    // }
 private:
 
     void detach() {
