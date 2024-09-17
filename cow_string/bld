@@ -2,3 +2,11 @@
 
 cmake -S . -B build  -DCMAKE_BUILD_TYPE=Debug
 time cmake --build build --parallel 4
+
+if [ "${build_test_on}" == "TESTS" ]; then
+    cmake -S . -B "${build_type}" -DCMAKE_BUILD_TYPE=build -DTESTS
+else
+    cmake -S . -B "${build_type}" -DCMAKE_BUILD_TYPE=${build_type}
+fi
+
+time cmake --build "${build_type}" --parallel 4
