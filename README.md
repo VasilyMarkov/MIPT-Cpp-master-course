@@ -5,7 +5,7 @@ This project is my implementation of `Copy-on-Write String`.
 Project contains big-5. Also substr and tokenizing support.
 
 ## Dependencies and requirements
-> 'cowString' requires at least a-std=c++20. \
+> 'cowString' requires at least C++20. \
 > Also 'cowString' requires boost-tokenizer library.
 >
 ## Installation and building
