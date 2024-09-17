@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [ -d "build" ]; then
+  cd build
+  ./stringTwine $@
+else
+  echo "Directory build doesn't exists."
+fi
