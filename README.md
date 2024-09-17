@@ -1,17 +1,24 @@
-# CoW String
-This project is my implementation of `Copy-on-Write String`.
+# String implementation
+This project consists CoW string implementation and a string_twine class that concatenates at O(logN). 
 
 ## Features
 Project contains big-5. Also substr and tokenizing support.
 
 ## Dependencies and requirements
-> 'cowString' requires at least C++20. \
+> Project requires at least C++20. \
 > Libraries: boost-tokenizer, googletests.
 ## Installation and building
 ### Install
 ```bash
 git clone https://github.com/VasilyMarkov/my_impl_cpp.git
 cd my_impl_cpp
+```
+```bash
+cd cow_string
+```
+or
+```bash
+cd string_twine
 ```
 ### Build
 #### Release
