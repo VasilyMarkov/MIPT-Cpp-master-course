@@ -84,7 +84,7 @@ struct basicCowString final
             boost::char_separator<CharT>(seps)
         );
 
-        return std::vector<basicCowString<char>>(std::begin(tokenizer), std::end(tokenizer));
+        return std::vector<basicCowString<CharT>>(std::begin(tokenizer), std::end(tokenizer));
     }
 
     friend constexpr bool operator==(const basicCowString& lhs, const basicCowString& rhs) 
