@@ -21,25 +21,26 @@ OUTPUT          "print"
 %%
 
 {WS}              /* skip blanks and tabs */
-"+"               parser->pushToken(my_impl::token_type::ADD);
-"-"               parser->pushToken(my_impl::token_type::SUB);
-"["               parser->pushToken(my_impl::token_type::OBRAC);
-"]"               parser->pushToken(my_impl::token_type::CBRAC);
-"="               parser->pushToken(my_impl::token_type::ASSIGN);
-";"               parser->pushToken(my_impl::token_type::SCOLON);
+"+"               parser->pushToken(my_impl::newAdd());
+"-"               parser->pushToken(my_impl::newSub());
+"["               parser->pushToken(my_impl::newOBracket());
+"]"               parser->pushToken(my_impl::newCBracket());
+"="               parser->pushToken(my_impl::newAssign());
+";"               parser->pushToken(my_impl::newScolon());
 
-{INPUT}           parser->pushToken(my_impl::token_type::INPUT);
-{OUTPUT}          parser->pushToken(my_impl::token_type::OUTPUT);
-{DIGIT1}{DIGIT}*  parser->pushValue(yytext);         
-{ID}              parser->pushId(yytext);         
+{INPUT}           parser->pushToken(my_impl::newInput());
+{OUTPUT}          parser->pushToken(my_impl::newOutput());
+{DIGIT1}{DIGIT}*  parser->pushToken(my_impl::newVal(yytext));       
+{ID}              parser->pushToken(my_impl::newId(yytext));         
+
 .			      
 
 %%
 
 int main() {
+    int tmp = 0;
+    std::cin >> tmp;
     while (ram.lexer()->yylex() != 0) {}
-
-    std::cout << *parser << std::endl;
 
     parser->parse();
 

@@ -1,1 +1,4 @@
-23 + 56 - hello
+a = 5 + 4;
+b = 1 + 2;
+print a;
+print b;

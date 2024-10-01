@@ -18,11 +18,3 @@ add_executable(Ram ${FLEX_scanner_OUTPUTS})
 
 target_include_directories(Ram PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_include_directories(Ram PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
-# if(TESTS)
-#     find_package(GTest REQUIRED)
-#     add_subdirectory(test)
-#     message("TESTING: ON")
-# else()
-#     message("TESTING: OFF")
-# endif()
