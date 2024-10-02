@@ -7,7 +7,7 @@
 #include <iostream>
 #include "lexer.hpp"
 
-static my_impl::Ram ram;
+static my_impl::Ram ram(1000);
 auto parser = ram.parser();
 
 %}

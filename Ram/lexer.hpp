@@ -24,7 +24,7 @@ namespace my_impl {
 
 class Ram final {
 public:
-    Ram():lexer_(std::make_unique<yy::RamLexer>()), parser_(std::make_unique<RamParser>()){}
+    Ram(size_t size):lexer_(std::make_unique<yy::RamLexer>()), parser_(std::make_unique<RamParser>(size)){}
 
     std::unique_ptr<yy::RamLexer> lexer() noexcept {return std::move(lexer_);}
 

@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <memory>
 #include <numeric>
+#include <exception>
 #include "token.hpp"
 
 namespace my_impl {
@@ -22,9 +23,9 @@ inline std::vector<int> global_memory_;
 
 class RamParser final {
 public:
-    RamParser()
+    RamParser(size_t size)
     {
-        global_memory_.resize(1000);
+        global_memory_.resize(size);
         std::iota(std::begin(global_memory_), std::end(global_memory_), 0);
     }
 
@@ -34,9 +35,6 @@ public:
     }
 
     void parse() {
-        // for(auto&& token : tokens_) {
-        //     std::cout << token->toString() << std::endl;
-        // }
         c_it_ = std::cbegin(tokens_);
         statement();
     }
@@ -54,16 +52,16 @@ private:
     tokens_t tokens_;
     tokens_cit c_it_;
 
-    bool tokenEq(tokens_cit c_it, token_type rhs) const
-        {return (*c_it)->type() == rhs;};
+    bool tokenEQ(tokens_cit c_it, token_type rhs) const
+    {return (*c_it)->type() == rhs;};
 
-    bool tokenNotEq(tokens_cit c_it, token_type rhs) const
-        {return (*c_it)->type() != rhs;};
+    bool tokenNEQ(tokens_cit c_it, token_type rhs) const
+    {return (*c_it)->type() != rhs;};
 
     void nextToken() {++c_it_;};
 
-    int statement() {
-
+    int statement() 
+    {
         if(c_it_ == std::cend(tokens_)) return 0;
 
         switch ((*c_it_)->type())
@@ -75,67 +73,89 @@ private:
             output();
             break;
         case token_type::ID:
-            assign();
+            assign(static_cast<IdToken&>(**c_it_).id());
+            break;
+        case token_type::OBRAC:
+            if(tokenEQ(std::next(c_it_), token_type::ASSIGN)) 
+            {
+                assign("c");
+            }
+            break;
+        case token_type::CBRAC:
+            if( tokenEQ(std::next(c_it_), token_type::OBRAC) &&
+                tokenEQ(std::next(c_it_, 2), token_type::ASSIGN))
+            {
+                nextToken();
+                assign("x");
+            }
             break;
         default:
             break;
         }
-        return 1;
+        nextToken();
+        if(tokenEQ(c_it_, token_type::SCOLON)) {
+            nextToken();
+            return statement();
+        }
+        throw std::runtime_error("Missing ;");
     }
 
-    int input() {
+    int input() 
+    {
         nextToken();
-        if(tokenEq(c_it_, token_type::ID)) {
+        if(tokenEQ(c_it_, token_type::ID)) {
 
             auto id = static_cast<IdToken&>(**c_it_).id();
 
-            if(tokenEq(c_it_, token_type::SCOLON)) {
-                int tmp = 0;
-                std::cout << "input: " << std::endl;
-                std::cin >> tmp;
-                var_store_.emplace(id, tmp);
-            }
-        }
-        nextToken();
-        return statement();
-    }
-
-    int output() {
-        nextToken();
-        if(tokenEq(c_it_, token_type::ID)) {
-
-            auto var = var_store_.at(static_cast<IdToken&>(**c_it_).id());
-
-            nextToken();
+            int tmp = 0;
+            std::cout << "input: " << std::endl;
+            std::cin >> tmp;
+            var_store_.emplace(id, tmp);
             
-            if(tokenEq(c_it_, token_type::SCOLON)) {
-                std::cout << var << std::endl;
-            }
         }
-        nextToken();
-        return statement();
+        return 0;
     }
 
-    int assign() {
-        auto id = static_cast<IdToken&>(**c_it_).id();
+    int output() 
+    {
+        nextToken();
+        if(tokenEQ(c_it_, token_type::ID)) {
+            auto var = var_store_.at(static_cast<IdToken&>(**c_it_).id());   
+            std::cout << var << std::endl;  
+        }
+        return 0;
+    }
+
+    int assign(std::string id) {
         nextToken();
 
-        if(tokenEq(c_it_, token_type::ASSIGN)) {
+        if(tokenEQ(c_it_, token_type::ASSIGN)) {
             if(var_store_.find(id) != std::end(var_store_)) {
                 nextToken();
-                var_store_.at(id) = expr();
+                var_store_.at(id) = global_memory_.at(expr());
             }
             else {
                 nextToken();
-                var_store_.emplace(id, expr());
+                var_store_.emplace(id, global_memory_.at(expr()));
             }
         }
-        return statement();
+        return 0;
     }
 
     int expr() {
+        if(tokenEQ(c_it_, token_type::OBRAC)) {
+            nextToken();
+            auto res = expr();
+            if(tokenEQ(c_it_, token_type::CBRAC))
+            {
+                return res;
+            }
+        }
+
         auto res = factor();
-        while(tokenNotEq(c_it_, token_type::SCOLON))
+
+        while(tokenEQ(c_it_, token_type::ADD) ||
+              tokenEQ(c_it_, token_type::SUB))
         {
             switch ((*c_it_)->type())
             {
@@ -151,8 +171,6 @@ private:
                 break;
             }
         }
-        nextToken();
-
         return res;
     }
 
