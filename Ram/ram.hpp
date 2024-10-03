@@ -52,7 +52,7 @@ private:
     tokens_t tokens_;
     tokens_cit c_it_;
 
-    void nextToken() {++c_it_;};
+    void nextToken() noexcept {++c_it_;};
 
     int statement() 
     {
@@ -238,21 +238,21 @@ private:
         return res;
     }
 
-    bool notC(tokens_cit token_it) const 
+    bool notC(tokens_cit token_it) const noexcept
     {
         return **token_it == token_type::OBRAC             &&
                **std::next(token_it) != token_type::ADD    &&
                **std::next(token_it) != token_type::SUB    &&
                **std::next(token_it) != token_type::CBRAC;
     }
-    bool notX(tokens_cit token_it) const 
+    bool notX(tokens_cit token_it) const noexcept
     {
         return **token_it == token_type::CBRAC             &&
                **std::next(token_it) != token_type::OBRAC  &&
                **std::next(token_it, 2) != token_type::SUB &&
                **std::next(token_it, 2) != token_type::CBRAC;
     }
-    bool emptyExpr(tokens_cit token_it) const
+    bool emptyExpr(tokens_cit token_it) const noexcept
     {
         return **token_it == token_type::OBRAC &&
                **std::next(token_it) == token_type::CBRAC;

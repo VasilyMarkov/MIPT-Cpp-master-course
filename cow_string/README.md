@@ -1,5 +1,5 @@
 # String implementation
-This project consists CoW string implementation and a string_twine class that concatenate at O(logN). 
+This project consists CoW string implementation.
 
 ## Features
 Project contains big-5. Also substr and tokenizing support.
@@ -15,10 +15,6 @@ cd my_impl_cpp
 ```
 ```bash
 cd cow_string
-```
-or
-```bash
-cd string_twine
 ```
 ### Build
 #### Release
