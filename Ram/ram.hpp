@@ -126,11 +126,19 @@ private:
         if(**c_it_ == token_type::ASSIGN) {
             if(var_store_.find(id) != std::end(var_store_)) {
                 nextToken();
-                var_store_.at(id) = global_memory_.at(expr());
+
+                int res = expr();
+                if(res < 0) throw std::runtime_error("Negative index");
+                
+                var_store_.at(id) = global_memory_.at(res);
             }
             else {
                 nextToken();
-                var_store_.emplace(id, global_memory_.at(expr()));
+
+                int res = expr();
+                if(res < 0) throw std::runtime_error("Negative index");
+                if(res > global_memory_.size()) throw std::runtime_error(" ");
+                var_store_.emplace(id, global_memory_.at(res));
             }
         }
         return 0;
@@ -139,7 +147,8 @@ private:
     int expr() {
         int res{};
         // id[expr]
-        if(**c_it_ == token_type::ID && **std::next(c_it_) == token_type::OBRAC) 
+        if(**c_it_ == token_type::ID && 
+           **std::next(c_it_) == token_type::OBRAC) 
         {
             auto id = static_cast<IdToken&>(**c_it_).id();
             nextToken();
@@ -197,9 +206,11 @@ private:
         else if(**c_it_ == token_type::ID) {
             res = var_store_.at(static_cast<IdToken&>(**c_it_).id());
         }
+        // [ as c
         else if(**c_it_ == token_type::OBRAC) {
             res = var_store_.at("c");
         }
+        // as x
         else if(**c_it_ == token_type::CBRAC && **std::next(c_it_) == token_type::OBRAC) {
             nextToken();
             res = var_store_.at("x");

@@ -37,10 +37,22 @@ OUTPUT          "print"
 
 %%
 
-int main() {
+int main(int argc, char *argv[]) {
 
     try {
+        if (argc != 2) {
+            std::cerr << "Wrong arguments!" << std::endl;
+            return 1;
+        }
+
+        std::ifstream file (argv[1]);
+        if (!file.is_open()) {
+            std::cerr << "Error opening file!" << std::endl;
+            return 0;
+        }
+        ram.setStream(file);
         while (ram.lexer()->yylex() != 0) {}
+        
 
         parser->parse();
     }
