@@ -137,17 +137,17 @@ private:
     }
 
     int expr() {
-
+        int res{};
         // id[expr]
         if(**c_it_ == token_type::ID && **std::next(c_it_) == token_type::OBRAC) 
         {
             auto id = static_cast<IdToken&>(**c_it_).id();
             nextToken();
             nextToken();
-            auto res = expr();
+            auto tmp = expr();
             if(**c_it_ == token_type::CBRAC)
             {
-                return var_store_.at(id) + res;
+                return var_store_.at(id) + tmp;
             }
         }
 
@@ -157,31 +157,35 @@ private:
            **std::next(c_it_) != token_type::SUB)
         {
             nextToken();
-            auto res = expr();
-            if(**c_it_ == token_type::CBRAC)
+            auto tmp = expr();
+            if(**c_it_ == token_type::CBRAC && //end of expr
+               **std::next(c_it_) == token_type::SCOLON)
             {
-                return res;
+                return tmp;
             }
+            res = tmp;
         }
-
         //expr
-        auto res = factor();
-        while(**c_it_ == token_type::ADD ||
-              **c_it_ == token_type::SUB)
-        {
-            switch ((*c_it_)->type())
+        else {
+            auto tmp = factor();
+            while(**c_it_ == token_type::ADD ||
+                **c_it_ == token_type::SUB)
             {
-            case token_type::ADD:
-                nextToken();
-                res += factor();
-                break;
-            case token_type::SUB:
-                nextToken();
-                res -= factor();
-                break;
-            default:
-                break;
+                switch ((*c_it_)->type())
+                {
+                case token_type::ADD:
+                    nextToken();
+                    tmp += expr();
+                    break;
+                case token_type::SUB:
+                    nextToken();
+                    tmp -= expr();
+                    break;
+                default:
+                    break;
+                }
             }
+            res = tmp;
         }
         return res;
     }

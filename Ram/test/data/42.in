@@ -2,6 +2,8 @@ a = [1+2+3];
 
 [ = [5 + 4];
 ][ = [[+ 1 + a];
+b = [][+ 1 + a];
 print a;
 print c;
 print x;
+print b;
