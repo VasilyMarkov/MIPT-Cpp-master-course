@@ -52,12 +52,6 @@ private:
     tokens_t tokens_;
     tokens_cit c_it_;
 
-    bool tokenEQ(tokens_cit c_it, token_type rhs) const
-    {return (*c_it)->type() == rhs;};
-
-    bool tokenNEQ(tokens_cit c_it, token_type rhs) const
-    {return (*c_it)->type() != rhs;};
-
     void nextToken() {++c_it_;};
 
     int statement() 
@@ -97,7 +91,7 @@ private:
             nextToken();
             return statement();
         }
-        throw std::runtime_error("Missing ;");
+        throw std::runtime_error("Syntax error: expected ;");
     }
 
     int input() 
@@ -144,6 +138,20 @@ private:
 
     int expr() {
 
+        // id[expr]
+        if(**c_it_ == token_type::ID && **std::next(c_it_) == token_type::OBRAC) 
+        {
+            auto id = static_cast<IdToken&>(**c_it_).id();
+            nextToken();
+            nextToken();
+            auto res = expr();
+            if(**c_it_ == token_type::CBRAC)
+            {
+                return var_store_.at(id) + res;
+            }
+        }
+
+        //[expr]
         if(**c_it_ == token_type::OBRAC             && 
            **std::next(c_it_) != token_type::ADD    &&
            **std::next(c_it_) != token_type::SUB)
@@ -156,8 +164,8 @@ private:
             }
         }
 
+        //expr
         auto res = factor();
-
         while(**c_it_ == token_type::ADD ||
               **c_it_ == token_type::SUB)
         {
@@ -180,26 +188,22 @@ private:
 
     int factor() {
         auto res = 0;
-        switch ((*c_it_)->type())
-        {
-        case token_type::VALUE:
+        if(**c_it_ == token_type::VALUE) {
             res = static_cast<ValueToken&>(**c_it_).value();
-            break;
-        case token_type::ID:
-            res = var_store_.at(static_cast<IdToken&>(**c_it_).id());
-            break;
-        case token_type::OBRAC:
-            res = var_store_.at("c");
-            break;
-        case token_type::CBRAC:
-            nextToken();
-            if(**c_it_ == token_type::OBRAC) {
-                res = var_store_.at("x");
-            }
-            break;
-        default:
-            break;
         }
+        else if(**c_it_ == token_type::ID) {
+            res = var_store_.at(static_cast<IdToken&>(**c_it_).id());
+        }
+        else if(**c_it_ == token_type::OBRAC) {
+            res = var_store_.at("c");
+        }
+        else if(**c_it_ == token_type::CBRAC && **std::next(c_it_) == token_type::OBRAC) {
+            nextToken();
+            res = var_store_.at("x");
+        }
+        else     
+            throw std::runtime_error("Syntax error");
+
         nextToken();
         return res;
     }

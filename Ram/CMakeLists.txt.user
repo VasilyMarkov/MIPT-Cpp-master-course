@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 5.0.2, 2024-10-02T23:33:19. -->
+<!-- Written by QtCreator 5.0.2, 2024-10-03T13:40:51. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -211,7 +211,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Ram</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeRunConfiguration.Ram</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">Ram</value>
-    <value type="QString" key="RunConfiguration.Arguments">&lt; ../test/data/5.in</value>
+    <value type="QString" key="RunConfiguration.Arguments">&lt; ../test/data/7.in</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>

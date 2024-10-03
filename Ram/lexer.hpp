@@ -34,6 +34,6 @@ private:
     std::unique_ptr<RamParser> parser_;
 };
 
-}
+} //namespace my_impl
 
 #endif //LEXER_H
