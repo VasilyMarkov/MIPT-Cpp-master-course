@@ -24,6 +24,12 @@ public:
     virtual token_type type() const noexcept = 0;
     virtual ~iToken() = default;
     virtual std::string toString() const = 0;
+    bool operator==(token_type token_type) const noexcept {
+        return type() == token_type;
+    }
+    bool operator!=(token_type token_type) const noexcept {
+        return type() != token_type;
+    }
 };
 
 class AddToken: public iToken {

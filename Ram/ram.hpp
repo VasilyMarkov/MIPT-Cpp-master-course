@@ -76,14 +76,14 @@ private:
             assign(static_cast<IdToken&>(**c_it_).id());
             break;
         case token_type::OBRAC:
-            if(tokenEQ(std::next(c_it_), token_type::ASSIGN)) 
+            if(**std::next(c_it_) == token_type::ASSIGN) 
             {
                 assign("c");
             }
             break;
         case token_type::CBRAC:
-            if( tokenEQ(std::next(c_it_), token_type::OBRAC) &&
-                tokenEQ(std::next(c_it_, 2), token_type::ASSIGN))
+            if(**std::next(c_it_) == token_type::OBRAC &&
+                **std::next(c_it_, 2) == token_type::ASSIGN)
             {
                 nextToken();
                 assign("x");
@@ -93,7 +93,7 @@ private:
             break;
         }
         nextToken();
-        if(tokenEQ(c_it_, token_type::SCOLON)) {
+        if(**c_it_ == token_type::SCOLON) {
             nextToken();
             return statement();
         }
@@ -103,7 +103,7 @@ private:
     int input() 
     {
         nextToken();
-        if(tokenEQ(c_it_, token_type::ID)) {
+        if(**c_it_ == token_type::ID) {
 
             auto id = static_cast<IdToken&>(**c_it_).id();
 
@@ -119,7 +119,7 @@ private:
     int output() 
     {
         nextToken();
-        if(tokenEQ(c_it_, token_type::ID)) {
+        if(**c_it_ == token_type::ID) {
             auto var = var_store_.at(static_cast<IdToken&>(**c_it_).id());   
             std::cout << var << std::endl;  
         }
@@ -129,7 +129,7 @@ private:
     int assign(std::string id) {
         nextToken();
 
-        if(tokenEQ(c_it_, token_type::ASSIGN)) {
+        if(**c_it_ == token_type::ASSIGN) {
             if(var_store_.find(id) != std::end(var_store_)) {
                 nextToken();
                 var_store_.at(id) = global_memory_.at(expr());
@@ -143,10 +143,14 @@ private:
     }
 
     int expr() {
-        if(tokenEQ(c_it_, token_type::OBRAC)) {
+
+        if(**c_it_ == token_type::OBRAC             && 
+           **std::next(c_it_) != token_type::ADD    &&
+           **std::next(c_it_) != token_type::SUB)
+        {
             nextToken();
             auto res = expr();
-            if(tokenEQ(c_it_, token_type::CBRAC))
+            if(**c_it_ == token_type::CBRAC)
             {
                 return res;
             }
@@ -154,8 +158,8 @@ private:
 
         auto res = factor();
 
-        while(tokenEQ(c_it_, token_type::ADD) ||
-              tokenEQ(c_it_, token_type::SUB))
+        while(**c_it_ == token_type::ADD ||
+              **c_it_ == token_type::SUB)
         {
             switch ((*c_it_)->type())
             {
@@ -183,6 +187,15 @@ private:
             break;
         case token_type::ID:
             res = var_store_.at(static_cast<IdToken&>(**c_it_).id());
+            break;
+        case token_type::OBRAC:
+            res = var_store_.at("c");
+            break;
+        case token_type::CBRAC:
+            nextToken();
+            if(**c_it_ == token_type::OBRAC) {
+                res = var_store_.at("x");
+            }
             break;
         default:
             break;

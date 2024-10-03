@@ -38,8 +38,6 @@ OUTPUT          "print"
 %%
 
 int main() {
-    int tmp = 0;
-    std::cin >> tmp;
     while (ram.lexer()->yylex() != 0) {}
 
     parser->parse();
