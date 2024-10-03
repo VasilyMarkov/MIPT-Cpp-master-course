@@ -137,7 +137,6 @@ private:
 
                 int res = expr();
                 if(res < 0) throw std::runtime_error("Negative index");
-                if(res > global_memory_.size()) throw std::runtime_error(" ");
                 var_store_.emplace(id, global_memory_.at(res));
             }
         }
@@ -145,6 +144,8 @@ private:
     }
 
     int expr() {
+        if (emptyExpr(c_it_)) throw std::runtime_error("Syntax error");
+
         int res{};
         // id[expr]
         if(**c_it_ == token_type::ID && 
@@ -163,7 +164,7 @@ private:
         else {
             auto tmp = factor();
             while(**c_it_ == token_type::ADD ||
-                **c_it_ == token_type::SUB)
+                  **c_it_ == token_type::SUB)
             {
                 switch ((*c_it_)->type())
                 {
@@ -187,9 +188,7 @@ private:
     int factor() {
         auto res = 0;
         //[expr]
-        if(**c_it_ == token_type::OBRAC             && 
-           **std::next(c_it_) != token_type::ADD    &&
-           **std::next(c_it_) != token_type::SUB)
+        if(notC(c_it_))
         {
             nextToken();
             auto tmp = expr();
@@ -220,6 +219,26 @@ private:
 
         nextToken();
         return res;
+    }
+
+    bool notC(tokens_cit token_it) const 
+    {
+        return **token_it == token_type::OBRAC             &&
+               **std::next(token_it) != token_type::ADD    &&
+               **std::next(token_it) != token_type::SUB    &&
+               **std::next(token_it) != token_type::CBRAC;
+    }
+    bool notX(tokens_cit token_it) const 
+    {
+        return **token_it == token_type::CBRAC             &&
+               **std::next(token_it) != token_type::OBRAC  &&
+               **std::next(token_it, 2) != token_type::SUB &&
+               **std::next(token_it, 2) != token_type::CBRAC;
+    }
+    bool emptyExpr(tokens_cit token_it) const
+    {
+        return **token_it == token_type::OBRAC &&
+               **std::next(token_it) == token_type::CBRAC;
     }
 
 };
