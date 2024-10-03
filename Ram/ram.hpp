@@ -150,21 +150,6 @@ private:
                 return var_store_.at(id) + tmp;
             }
         }
-
-        //[expr]
-        if(**c_it_ == token_type::OBRAC             && 
-           **std::next(c_it_) != token_type::ADD    &&
-           **std::next(c_it_) != token_type::SUB)
-        {
-            nextToken();
-            auto tmp = expr();
-            if(**c_it_ == token_type::CBRAC && //end of expr
-               **std::next(c_it_) == token_type::SCOLON)
-            {
-                return tmp;
-            }
-            res = tmp;
-        }
         //expr
         else {
             auto tmp = factor();
@@ -192,7 +177,21 @@ private:
 
     int factor() {
         auto res = 0;
-        if(**c_it_ == token_type::VALUE) {
+        //[expr]
+        if(**c_it_ == token_type::OBRAC             && 
+           **std::next(c_it_) != token_type::ADD    &&
+           **std::next(c_it_) != token_type::SUB)
+        {
+            nextToken();
+            auto tmp = expr();
+            if(**c_it_ == token_type::CBRAC && //end of expr
+               **std::next(c_it_) == token_type::SCOLON)
+            {
+                return tmp;
+            }
+            res = tmp;
+        }
+        else if(**c_it_ == token_type::VALUE) {
             res = static_cast<ValueToken&>(**c_it_).value();
         }
         else if(**c_it_ == token_type::ID) {
