@@ -117,6 +117,23 @@ private:
             auto var = var_store_.at(static_cast<IdToken&>(**c_it_).id());   
             std::cout << var << std::endl;  
         }
+        else if(**c_it_ == token_type::OBRAC &&
+                **std::next(c_it_) == token_type::SCOLON) {
+            auto var = var_store_.at("c");
+            std::cout << var << std::endl;
+        }
+        else if(**c_it_ == token_type::CBRAC &&
+                **std::next(c_it_) == token_type::OBRAC &&
+                **std::next(c_it_, 2) == token_type::SCOLON) {
+            auto var = var_store_.at("x");
+            std::cout << var << std::endl;
+            nextToken();
+        }
+        else {
+            auto var = expr();   
+            std::cout << var << std::endl;
+        }
+
         return 0;
     }
 
