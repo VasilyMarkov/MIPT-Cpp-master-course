@@ -1,4 +1,4 @@
-# String implementation
+# The [Ram interpreter
 This is a [Ram project. The project represent a simple non context-free grammar.
 
 ## Dependencies and requirements
@@ -35,7 +35,7 @@ cmake --preset sanitize_test
 cmake --build --preset sanitize_test
 ```
 ## Run
-For run [Ram parser you need to write language constructs to a file and pass the file to [Ram as an argument
+For run [Ram interpreter you need to write language constructs to a file and pass the file to [Ram as an argument
 ```bash
 ./Ram {file_path}
 ```
