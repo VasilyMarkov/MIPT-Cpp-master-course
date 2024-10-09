@@ -103,10 +103,8 @@ private:
             auto id = static_cast<IdToken&>(**c_it_).id();
 
             int tmp = 0;
-            std::cout << "input: " << std::endl;
             std::cin >> tmp;
             var_store_.emplace(id, tmp);
-            
         }
         return 0;
     }
