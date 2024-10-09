@@ -5,10 +5,9 @@
 %{
 
 #include <iostream>
-#include "lexer.hpp"
+#include "ram.hpp"
 
-static my_impl::Ram ram(1000);
-auto parser = ram.parser();
+auto parser = std::make_unique<my_impl::RamParser>();
 
 %}
 
@@ -32,32 +31,11 @@ OUTPUT          "print"
 {OUTPUT}          parser->pushToken(my_impl::newOutput());
 {DIGIT1}{DIGIT}*  parser->pushToken(my_impl::newVal(yytext));       
 {ID}              parser->pushToken(my_impl::newId(yytext));         
-
+<<EOF>>           {
+    parser->parse();
+    return 0;
+} 
 .			      
 
 %%
 
-int main(int argc, char *argv[]) {
-
-    try {
-        if (argc != 2) {
-            std::cerr << "Wrong arguments!" << std::endl;
-            return 1;
-        }
-
-        std::ifstream file (argv[1]);
-        if (!file.is_open()) {
-            std::cerr << "Error opening file!" << std::endl;
-            return 0;
-        }
-        ram.setStream(file);
-        while (ram.lexer()->yylex() != 0) {}
-        
-
-        parser->parse();
-    }
-    catch(const std::exception& e) {
-        std::cout << e.what() << std::endl;
-    }
-
-}

@@ -10,6 +10,8 @@
 
 namespace my_impl {
 
+constexpr size_t MEM_SIZE = 1000;
+
 template <typename T, typename U>
 inline void print(const std::unordered_map<T, U>& map) {
     for(auto&& [key, value] : map) {
@@ -19,13 +21,12 @@ inline void print(const std::unordered_map<T, U>& map) {
 }
 
 inline std::unordered_map<std::string, int> var_store_;
-inline std::vector<int> global_memory_;
+inline std::vector<int> global_memory_(MEM_SIZE);
 
 class RamParser final {
 public:
-    RamParser(size_t size)
+    RamParser()
     {
-        global_memory_.resize(size);
         std::iota(std::begin(global_memory_), std::end(global_memory_), 0);
     }
 
