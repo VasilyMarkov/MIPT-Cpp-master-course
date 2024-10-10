@@ -64,7 +64,7 @@ public:
     {return token_type::OBRAC;}
 
     std::string toString() const override {
-        return "-";
+        return "[";
     }
 };
 
@@ -76,7 +76,7 @@ public:
     {return token_type::CBRAC;}
 
     std::string toString() const override {
-        return "-";
+        return "]";
     }
 };
 
@@ -88,7 +88,7 @@ public:
     {return token_type::ASSIGN;}
 
     std::string toString() const override {
-        return "-";
+        return "=";
     }
 };
 

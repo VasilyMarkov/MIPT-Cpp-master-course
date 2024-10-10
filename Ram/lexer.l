@@ -28,6 +28,7 @@ OUTPUT          "print"
 {INPUT}           return static_cast<int>(my_impl::token_type::INPUT);
 {OUTPUT}          return static_cast<int>(my_impl::token_type::OUTPUT);
 {DIGIT1}{DIGIT}*  return static_cast<int>(my_impl::token_type::VALUE);   
+{DIGIT}          return static_cast<int>(my_impl::token_type::VALUE);   
 {ID}              return static_cast<int>(my_impl::token_type::ID);
 .			      
 
