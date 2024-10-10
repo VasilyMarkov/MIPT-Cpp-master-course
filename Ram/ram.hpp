@@ -6,12 +6,14 @@
 #include <memory>
 #include <numeric>
 #include <exception>
-#include "token.hpp"
+#include <filesystem>
 #include <sstream>
+#include <fstream>
+#include "token.hpp"
 
 namespace my_impl {
 
-constexpr size_t MEM_SIZE = 1000;
+namespace utility {
 
 template <typename T, typename U>
 inline void print(const std::unordered_map<T, U>& map) {
@@ -21,6 +23,29 @@ inline void print(const std::unordered_map<T, U>& map) {
     }
     
 }
+
+inline std::stringstream readFile(const std::filesystem::path& filePath) {
+    if (!std::filesystem::exists(filePath)) {
+        throw std::runtime_error(std::string("File does not exist: ") + filePath.string());
+    }
+
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        throw std::runtime_error(std::string("Failed to open file: ") + filePath.string());
+    }
+
+    std::string line;
+    std::stringstream stream;
+    while (std::getline(file, line)) {
+        stream << line << std::endl;
+    }
+    file.close();
+    return stream;
+}
+
+} //namespace utility
+
+constexpr size_t MEM_SIZE = 1000;
 
 inline std::unordered_map<std::string, int> var_store_;
 inline std::vector<int> global_memory_(MEM_SIZE);
