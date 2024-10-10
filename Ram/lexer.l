@@ -6,9 +6,7 @@
 
 #include <iostream>
 #include "ram.hpp"
-
-auto parser = std::make_unique<my_impl::RamParser>();
-
+#include "token.hpp"
 %}
 
 WS              [ \t\n\v]+
@@ -20,21 +18,17 @@ OUTPUT          "print"
 %%
 
 {WS}              /* skip blanks and tabs */
-"+"               parser->pushToken(my_impl::newAdd());
-"-"               parser->pushToken(my_impl::newSub());
-"["               parser->pushToken(my_impl::newOBracket());
-"]"               parser->pushToken(my_impl::newCBracket());
-"="               parser->pushToken(my_impl::newAssign());
-";"               parser->pushToken(my_impl::newScolon());
+"+"               return static_cast<int>(my_impl::token_type::ADD);
+"-"               return static_cast<int>(my_impl::token_type::SUB);
+"["               return static_cast<int>(my_impl::token_type::OBRAC);
+"]"               return static_cast<int>(my_impl::token_type::CBRAC);
+"="               return static_cast<int>(my_impl::token_type::ASSIGN);
+";"               return static_cast<int>(my_impl::token_type::SCOLON);
 
-{INPUT}           parser->pushToken(my_impl::newInput());
-{OUTPUT}          parser->pushToken(my_impl::newOutput());
-{DIGIT1}{DIGIT}*  parser->pushToken(my_impl::newVal(yytext));       
-{ID}              parser->pushToken(my_impl::newId(yytext));         
-<<EOF>>           {
-    parser->parse();
-    return 0;
-} 
+{INPUT}           return static_cast<int>(my_impl::token_type::INPUT);
+{OUTPUT}          return static_cast<int>(my_impl::token_type::OUTPUT);
+{DIGIT1}{DIGIT}*  return static_cast<int>(my_impl::token_type::VALUE);   
+{ID}              return static_cast<int>(my_impl::token_type::ID);
 .			      
 
 %%

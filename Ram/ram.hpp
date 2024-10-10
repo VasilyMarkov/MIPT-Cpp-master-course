@@ -7,6 +7,7 @@
 #include <numeric>
 #include <exception>
 #include "token.hpp"
+#include <sstream>
 
 namespace my_impl {
 
@@ -16,8 +17,9 @@ template <typename T, typename U>
 inline void print(const std::unordered_map<T, U>& map) {
     for(auto&& [key, value] : map) {
         std::cout << "key: " << key 
-        << " with value :" << value <<  ' ';
+        << " with value: " << value <<  std::endl;
     }
+    
 }
 
 inline std::unordered_map<std::string, int> var_store_;
@@ -25,7 +27,7 @@ inline std::vector<int> global_memory_(MEM_SIZE);
 
 class RamParser final {
 public:
-    RamParser()
+    RamParser():out_stream_(std::make_unique<std::stringstream>())
     {
         std::iota(std::begin(global_memory_), std::end(global_memory_), 0);
     }
@@ -39,6 +41,10 @@ public:
         c_it_ = std::cbegin(tokens_);
         statement();
     }
+    
+    std::unique_ptr<std::stringstream> getStream() noexcept {
+        return std::move(out_stream_);
+    }
 
     friend std::ostream& operator<<(std::ostream& os, const RamParser& parser) 
     {
@@ -48,6 +54,7 @@ public:
         return os;
     }
 private:
+    std::unique_ptr<std::stringstream> out_stream_;
     using tokens_t =  std::vector<std::unique_ptr<iToken>>;
     using tokens_cit = tokens_t::const_iterator;
     tokens_t tokens_;
@@ -114,23 +121,23 @@ private:
         nextToken();
         if(**c_it_ == token_type::ID) {
             auto var = var_store_.at(static_cast<IdToken&>(**c_it_).id());   
-            std::cout << var << std::endl;  
+            *out_stream_ << var << std::endl;  
         }
         else if(**c_it_ == token_type::OBRAC &&
                 **std::next(c_it_) == token_type::SCOLON) {
             auto var = var_store_.at("c");
-            std::cout << var << std::endl;
+            *out_stream_ << var << std::endl;
         }
         else if(**c_it_ == token_type::CBRAC &&
                 **std::next(c_it_) == token_type::OBRAC &&
                 **std::next(c_it_, 2) == token_type::SCOLON) {
             auto var = var_store_.at("x");
-            std::cout << var << std::endl;
+            *out_stream_ << var << std::endl;
             nextToken();
         }
         else {
             auto var = expr();   
-            std::cout << var << std::endl;
+            *out_stream_ << var << std::endl;
         }
 
         return 0;
@@ -269,8 +276,6 @@ inline std::unique_ptr<iToken> newInput()                   {return std::make_un
 inline std::unique_ptr<iToken> newOutput()                  {return std::make_unique<OutputToken>();}
 inline std::unique_ptr<iToken> newVal(const char* value)    {return std::make_unique<ValueToken>(value);}
 inline std::unique_ptr<iToken> newId(const char* id)        {return std::make_unique<IdToken>(id);}
-
-
 
 } //namespace my_impl
 

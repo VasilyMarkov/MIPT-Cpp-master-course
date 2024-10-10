@@ -14,15 +14,15 @@ flex_target(scanner
   ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc
 )
 
-add_executable(Ram main.cpp ${FLEX_scanner_OUTPUTS})
-
-target_include_directories(Ram PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-target_include_directories(Ram PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
 if(TESTS)
     find_package(GTest REQUIRED)
     add_subdirectory(test)
     message("TESTING: ON")
 else()
+    add_executable(Ram main.cpp ${FLEX_scanner_OUTPUTS})
+
+    target_include_directories(Ram PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    target_include_directories(Ram PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    
     message("TESTING: OFF")
 endif()

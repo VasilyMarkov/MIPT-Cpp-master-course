@@ -7,7 +7,7 @@ namespace my_impl
 {
 
 enum class token_type {
-    ADD,
+    ADD = 1,
     SUB,
     VALUE,
     OBRAC,
