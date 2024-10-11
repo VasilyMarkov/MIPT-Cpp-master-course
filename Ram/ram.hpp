@@ -265,9 +265,6 @@ private:
         else if(**iter == token_type::VALUE) {
             res = static_cast<ValueToken&>(**iter).value();
         }
-        else if(**iter == token_type::ID) {
-            res = var_store_.at(static_cast<IdToken&>(**iter).id());
-        }
         else
             throw ram_error("Syntax error");
 
