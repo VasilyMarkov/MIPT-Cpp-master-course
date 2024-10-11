@@ -45,7 +45,7 @@ public:
 
     void parse() 
     {
-        c_it_ = std::cbegin(tokens_);
+        iter = std::cbegin(tokens_);
 
         try {
             statement();
@@ -75,44 +75,73 @@ private:
     using tokens_t =  std::vector<std::unique_ptr<iToken>>;
     using tokens_cit = tokens_t::const_iterator;
     tokens_t tokens_;
-    tokens_cit c_it_;
+    tokens_cit iter;
 
-    void nextToken() noexcept {++c_it_;};
+    void nextToken() noexcept {++iter;};
 
     int statement() 
     {
-        if(c_it_ == std::cend(tokens_)) return 0;
+        if(iter == std::cend(tokens_)) return 0;
 
-        switch ((*c_it_)->type())
-        {
-        case token_type::INPUT:
+        // switch ((*iter)->type())
+        // {
+        // case token_type::INPUT:
+        //     input();
+        //     break;
+        // case token_type::OUTPUT:
+        //     output();
+        //     break;
+        // case token_type::ID:
+        //     assign(static_cast<IdToken&>(**iter).id());
+        //     break;
+        // case token_type::OBRAC:
+        //     if(**std::next(iter) == token_type::ASSIGN) 
+        //     {
+        //         assign("c");
+        //     }
+        //     break;
+        // case token_type::CBRAC:
+        //     if(**std::next(iter) == token_type::OBRAC &&
+        //         **std::next(iter, 2) == token_type::ASSIGN)
+        //     {
+        //         nextToken();
+        //         assign("x");
+        //     }
+        //     break;
+        // default:
+        //     break;
+        // }
+        // nextToken();
+        // if(**iter == token_type::SCOLON) {
+        //     nextToken();
+        //     return statement();
+        // }
+        // throw ram_error("Syntax error: expected ;");
+
+        // input expr;
+        if(**iter == token_type::INPUT) {
             input();
-            break;
-        case token_type::OUTPUT:
+        }
+        // print expr;
+        else if(**iter == token_type::OUTPUT) {
             output();
-            break;
-        case token_type::ID:
-            assign(static_cast<IdToken&>(**c_it_).id());
-            break;
-        case token_type::OBRAC:
-            if(**std::next(c_it_) == token_type::ASSIGN) 
-            {
-                assign("c");
+        }
+        // expr = expr;
+        else {
+            auto lhs = expr();
+
+            if (lhs < 0 || lhs > global_memory_.size()) throw ram_error("out of memory");
+
+            nextToken();
+            if(**iter == token_type::ASSIGN) {
+                auto rhs = expr();
+                if(lhs)
+                global_memory_[lhs] = rhs;
+                std::cout << global_memory_[lhs] << std::endl;
             }
-            break;
-        case token_type::CBRAC:
-            if(**std::next(c_it_) == token_type::OBRAC &&
-                **std::next(c_it_, 2) == token_type::ASSIGN)
-            {
-                nextToken();
-                assign("x");
-            }
-            break;
-        default:
-            break;
         }
         nextToken();
-        if(**c_it_ == token_type::SCOLON) {
+        if(**iter == token_type::SCOLON) {
             nextToken();
             return statement();
         }
@@ -122,9 +151,10 @@ private:
     int input() 
     {
         nextToken();
-        if(**c_it_ == token_type::ID) {
+        auto res = expr();
+        if(**iter == token_type::ID) {
 
-            auto id = static_cast<IdToken&>(**c_it_).id();
+            auto id = static_cast<IdToken&>(**iter).id();
 
             int tmp = 0;
             std::cin >> tmp;
@@ -136,18 +166,18 @@ private:
     int output() 
     {
         nextToken();
-        if(**c_it_ == token_type::ID) {
-            auto var = var_store_.at(static_cast<IdToken&>(**c_it_).id());   
+        if(**iter == token_type::ID) {
+            auto var = var_store_.at(static_cast<IdToken&>(**iter).id());   
             *out_stream_ << var << std::endl;  
         }
-        else if(**c_it_ == token_type::OBRAC &&
-                **std::next(c_it_) == token_type::SCOLON) {
+        else if(**iter == token_type::OBRAC &&
+                **std::next(iter) == token_type::SCOLON) {
             auto var = var_store_.at("c");
             *out_stream_ << var << std::endl;
         }
-        else if(**c_it_ == token_type::CBRAC &&
-                **std::next(c_it_) == token_type::OBRAC &&
-                **std::next(c_it_, 2) == token_type::SCOLON) {
+        else if(**iter == token_type::CBRAC &&
+                **std::next(iter) == token_type::OBRAC &&
+                **std::next(iter, 2) == token_type::SCOLON) {
             auto var = var_store_.at("x");
             *out_stream_ << var << std::endl;
             nextToken();
@@ -164,7 +194,7 @@ private:
     {
         nextToken();
 
-        if(**c_it_ == token_type::ASSIGN) {
+        if(**iter == token_type::ASSIGN) {
             if(var_store_.find(id) != std::end(var_store_)) {
                 nextToken();
 
@@ -186,29 +216,29 @@ private:
 
     int expr() 
     {
-        if (emptyExpr(c_it_)) throw ram_error("Syntax error");
+        if (emptyExpr(iter)) throw ram_error("Syntax error");
 
         int res{};
         // id[expr]
-        if(**c_it_ == token_type::ID && 
-           **std::next(c_it_) == token_type::OBRAC) 
-        {
-            auto id = static_cast<IdToken&>(**c_it_).id();
-            nextToken();
-            nextToken();
-            auto tmp = expr();
-            if(**c_it_ == token_type::CBRAC)
-            {
-                return var_store_.at(id) + tmp;
-            }
-        }
+//        if(**iter == token_type::ID &&
+//           **std::next(iter) == token_type::OBRAC)
+//        {
+//            auto id = static_cast<IdToken&>(**iter).id();
+//            nextToken();
+//            nextToken();
+//            auto tmp = expr();
+//            if(**iter == token_type::CBRAC)
+//            {
+//                return var_store_.at(id) + tmp;
+//            }
+//        }
         //expr
-        else {
+//        else {
             auto tmp = factor();
-            while(**c_it_ == token_type::ADD ||
-                  **c_it_ == token_type::SUB)
+            while(**iter == token_type::ADD ||
+                  **iter == token_type::SUB)
             {
-                switch ((*c_it_)->type())
+                switch ((*iter)->type())
                 {
                 case token_type::ADD:
                     nextToken();
@@ -223,7 +253,8 @@ private:
                 }
             }
             res = tmp;
-        }
+//        }
+        nextToken();
         return res;
     }
 
@@ -231,34 +262,33 @@ private:
     {
         auto res = 0;
         //[expr]
-        if(notC(c_it_))
-        {
-            nextToken();
-            auto tmp = expr();
-            if(**c_it_ == token_type::CBRAC && //end of expr
-               **std::next(c_it_) == token_type::SCOLON)
-            {
-                return tmp;
-            }
-            res = tmp;
+//        if(notC(iter))
+//        {
+//            nextToken();
+//            auto tmp = expr();
+//            if(**iter == token_type::CBRAC && //end of expr
+//               **std::next(iter) == token_type::SCOLON)
+//            {
+//                return tmp;
+//            }
+//            res = tmp;
+//        }
+        if(**iter == token_type::VALUE) {
+            res = static_cast<ValueToken&>(**iter).value();
         }
-        else if(**c_it_ == token_type::VALUE) {
-            res = static_cast<ValueToken&>(**c_it_).value();
-        }
-        else if(**c_it_ == token_type::ID) {
-            res = var_store_.at(static_cast<IdToken&>(**c_it_).id());
-        }
-        // [ as c
-        else if(**c_it_ == token_type::OBRAC) {
-            res = var_store_.at("c");
-        }
-        // as x
-        else if(**c_it_ == token_type::CBRAC && **std::next(c_it_) == token_type::OBRAC) {
-            nextToken();
-            res = var_store_.at("x");
-        }
-        else     
-            throw ram_error("Syntax error");
+//        if(**iter == token_type::ID) {
+//            res = var_store_.at(static_cast<IdToken&>(**iter).id());
+//        }
+//        // [ as c
+//        if(**iter == token_type::OBRAC) {
+//            res = var_store_.at("c");
+//        }
+//        // as x
+//        if(**iter == token_type::CBRAC && **std::next(iter) == token_type::OBRAC) {
+//            nextToken();
+//            res = var_store_.at("x");
+//        }
+        else throw ram_error("Syntax error");
 
         nextToken();
         return res;
