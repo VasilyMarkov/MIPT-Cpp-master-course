@@ -243,26 +243,50 @@ private:
         {
             auto id = static_cast<IdToken&>(**iter).id();
             nextToken();
-            if(**iter == token_type::OBRAC) {
+            if(**iter == token_type::OBRAC) 
+            {
                 return var_store_.at(id) + expr();
             }
             return var_store_.at(id);
         }
-        else if(**iter == token_type::OBRAC) {
+        else if(**iter == token_type::OBRAC) 
+        {
             nextToken();
+            // [[+1] as [c+1] or [1+[-1]] as [1+c-1]
             if(**iter == token_type::ADD || **iter == token_type::SUB) {
                 return var_store_.at("c");
             }
-            if(**iter == token_type::CBRAC) {
+            // [1+[] as [1+c] 
+            if(**iter == token_type::CBRAC && **std::next(iter) != token_type::OBRAC) 
+            {
                 return var_store_.at("c");
             }
             int res = expr();
-            if(**iter == token_type::CBRAC) {
+            if(**iter == token_type::CBRAC) 
+            {
                 nextToken();
                 return res;
             }
         }
-        else if(**iter == token_type::VALUE) {
+        else if(**iter == token_type::CBRAC && 
+                **std::next(iter) == token_type::OBRAC) 
+        {
+            nextToken();
+            nextToken();
+            // [][+1] as [x+1] or [1+][-1]] as [1+x-1]
+            if(**iter == token_type::ADD || **iter == token_type::SUB) 
+            {
+                return var_store_.at("x");
+            }
+            // [1+][] as [1+x] 
+            // have to look back (my best idea ever)
+            if(**iter == token_type::CBRAC && (**std::next(iter, -3) == token_type::ADD || **std::next(iter, -3) == token_type::SUB)) 
+            {
+                return var_store_.at("x");
+            }
+        }
+        else if(**iter == token_type::VALUE) 
+        {
             res = static_cast<ValueToken&>(**iter).value();
         }
         else
