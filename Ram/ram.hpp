@@ -217,7 +217,7 @@ private:
               **iter == token_type::SUB)
         {
             switch ((*iter)->type())
-            {
+            { 
             case token_type::ADD:
                 nextToken();
                 tmp += expr();
@@ -253,7 +253,7 @@ private:
             if(**iter == token_type::ADD || **iter == token_type::SUB) {
                 return var_store_.at("c");
             }
-            if(**iter == token_type::CBRAC && **std::next(iter) != token_type::CBRAC) {
+            if(**iter == token_type::CBRAC) {
                 return var_store_.at("c");
             }
             int res = expr();
