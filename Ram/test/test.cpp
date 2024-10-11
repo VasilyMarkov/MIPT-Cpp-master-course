@@ -96,7 +96,7 @@ TEST_P(ContextFreeTest, test)
 
 
 class Test: public testing::TestWithParam<int> {};
-INSTANTIATE_TEST_SUITE_P(commonTest, Test, ::testing::Values(1,2,3,4,5,6,7,8,9,10,11,12,13,14));
+INSTANTIATE_TEST_SUITE_P(commonTest, Test, ::testing::Values(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16));
 
 
 TEST_P(Test, commonTest) 
@@ -116,7 +116,7 @@ TEST_P(Test, commonTest)
 }
 
 class ErrorTest: public testing::TestWithParam<int> {};
-INSTANTIATE_TEST_SUITE_P(err, ErrorTest, ::testing::Values(1,2,3,4,5));
+INSTANTIATE_TEST_SUITE_P(err, ErrorTest, ::testing::Values(1,2,3,4));
 
 
 TEST_P(ErrorTest, test) 
