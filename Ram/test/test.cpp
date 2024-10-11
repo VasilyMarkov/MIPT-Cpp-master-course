@@ -96,7 +96,7 @@ TEST_P(ContextFreeTest, test)
 
 
 class Test: public testing::TestWithParam<int> {};
-INSTANTIATE_TEST_SUITE_P(commonTest, Test, ::testing::Values(1,2,3,4,5,6,7,8,9,10));
+INSTANTIATE_TEST_SUITE_P(commonTest, Test, ::testing::Values(1,2,3,4,5,6,7,8,9,10,11,12,13,14));
 
 
 TEST_P(Test, commonTest) 
@@ -115,30 +115,30 @@ TEST_P(Test, commonTest)
     }
 }
 
-// class ErrorTest: public testing::TestWithParam<int> {};
-// INSTANTIATE_TEST_SUITE_P(err, ErrorTest, ::testing::Values(1,2,3,4,5,6));
+class ErrorTest: public testing::TestWithParam<int> {};
+INSTANTIATE_TEST_SUITE_P(err, ErrorTest, ::testing::Values(1,2,3,4,5));
 
 
-// TEST_P(ErrorTest, test) 
-// {
-//     try {
-//         auto file = err_file_names.at(GetParam());
-//         auto stream = my_impl::utility::readFile(file);
-//         auto driver = std::make_unique<my_impl::Driver>(stream);
-//         driver->parse();
+TEST_P(ErrorTest, test) 
+{
+    try {
+        auto file = err_file_names.at(GetParam());
+        auto stream = my_impl::utility::readFile(file);
+        auto driver = std::make_unique<my_impl::Driver>(stream);
+        driver->parse();
 
-//         auto output = driver->output();
+        auto output = driver->output();
 
-//         EXPECT_TRUE(output == "Syntax error\n"             || 
-//                     output == "Syntax error: expected ;\n" ||
-//                     output == "Negative index\n" 
-//                     );
+        EXPECT_TRUE(output == "Syntax error\n"             || 
+                    output == "Syntax error: expected ;\n" ||
+                    output == "Out of memory\n" 
+                    );
         
-//     }
-//     catch(const std::exception& excep) {
-//         FAIL() << excep.what();
-//     }
-// }
+    }
+    catch(const std::exception& excep) {
+        FAIL() << excep.what();
+    }
+}
 
 
 int main(int argc, char **argv) 
