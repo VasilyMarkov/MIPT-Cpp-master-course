@@ -211,8 +211,6 @@ private:
 
     int expr() 
     {
-//        if (emptyExpr(iter)) throw ram_error("Syntax error");
-
         int res{};
         int tmp = factor();
         while(**iter == token_type::ADD ||
@@ -276,27 +274,6 @@ private:
         nextToken();
         return res;
     }
-
-    bool notC(tokens_cit token_it) const noexcept
-    {
-        return **token_it == token_type::OBRAC             &&
-               **std::next(token_it) != token_type::ADD    &&
-               **std::next(token_it) != token_type::SUB    &&
-               **std::next(token_it) != token_type::CBRAC;
-    }
-    bool notX(tokens_cit token_it) const noexcept
-    {
-        return **token_it == token_type::CBRAC             &&
-               **std::next(token_it) != token_type::OBRAC  &&
-               **std::next(token_it, 2) != token_type::SUB &&
-               **std::next(token_it, 2) != token_type::CBRAC;
-    }
-    bool emptyExpr(tokens_cit token_it) const noexcept
-    {
-        return **token_it == token_type::OBRAC &&
-               **std::next(token_it) == token_type::CBRAC;
-    }
-
 };
 
 inline std::unique_ptr<iToken> newAdd()                     {return std::make_unique<AddToken>();}
