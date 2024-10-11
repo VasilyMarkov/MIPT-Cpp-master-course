@@ -103,15 +103,18 @@ private:
             varAssign(varType::OTHER);
         }
         // [ = expr;
-        else if(**iter == token_type::OBRAC)
+        else if(**iter == token_type::OBRAC &&
+                **std::next(iter) == token_type::ASSIGN)
         {
-            varAssign(varType::X);
+            varAssign(varType::C);
         }
         // ][ = expr;
         else if(**iter == token_type::CBRAC &&
-           **std::next(iter) == token_type::OBRAC) 
+                **std::next(iter) == token_type::OBRAC &&
+                **std::next(iter, 2) == token_type::ASSIGN)
         {
-            varAssign(varType::C);
+            nextToken();
+            varAssign(varType::X);
         }
         // expr = expr
         else 
@@ -157,12 +160,11 @@ private:
 
         if (lhs < 0 || lhs > global_memory_.size()) throw ram_error("Out of memory");
 
-        nextToken();
         if(**iter == token_type::ASSIGN) {
+            nextToken();
             auto rhs = expr();
             if(lhs)
             global_memory_[lhs] = rhs;
-            std::cout << global_memory_[lhs] << std::endl;
         }
     }
 
@@ -170,7 +172,6 @@ private:
         switch (var_type)
         {
         case varType::X:
-            nextToken();
             assign("x");
             break;
         case varType::C:

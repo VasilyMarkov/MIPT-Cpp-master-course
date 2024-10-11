@@ -95,25 +95,25 @@ TEST_P(ContextFreeTest, test)
 }
 
 
-// class Test: public testing::TestWithParam<int> {};
-// INSTANTIATE_TEST_SUITE_P(test, Test, ::testing::Values(1,2,3,4,5,6,7,8,9,10));
+class Test: public testing::TestWithParam<int> {};
+INSTANTIATE_TEST_SUITE_P(commonTest, Test, ::testing::Values(1,2,3,4,5,6,7,8,9,10));
 
 
-// TEST_P(Test, test) 
-// {
-//     try {
-//         auto file = single_answers.at(GetParam());
-//         auto stream = my_impl::utility::readFile(file);
-//         auto driver = std::make_unique<my_impl::Driver>(stream);
-//         driver->parse();
+TEST_P(Test, commonTest) 
+{
+    try {
+        auto file = single_answers.at(GetParam());
+        auto stream = my_impl::utility::readFile(file);
+        auto driver = std::make_unique<my_impl::Driver>(stream);
+        driver->parse();
 
-//         EXPECT_EQ(std::stoi(driver->output()), GetParam());
+        EXPECT_EQ(std::stoi(driver->output()), GetParam());
         
-//     }
-//     catch(const std::exception& excep) {
-//         FAIL() << excep.what();
-//     }
-// }
+    }
+    catch(const std::exception& excep) {
+        FAIL() << excep.what();
+    }
+}
 
 // class ErrorTest: public testing::TestWithParam<int> {};
 // INSTANTIATE_TEST_SUITE_P(err, ErrorTest, ::testing::Values(1,2,3,4,5,6));
