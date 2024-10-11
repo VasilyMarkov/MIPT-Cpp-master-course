@@ -43,7 +43,7 @@
       },
       {
         "name": "sanitize",
-        "inherits": "debug",
+        "inherits": "test",
         "cacheVariables": {
           "SANITIZE": "ON",
           "CMAKE_CXX_FLAGS_DEBUG": "-g -O2 -Wall -Wextra -fsanitize=address"

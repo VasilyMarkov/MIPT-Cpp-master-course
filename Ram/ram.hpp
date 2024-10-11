@@ -24,6 +24,11 @@ private:
     std::string what_;
 };
 
+enum class varType {
+    X,
+    C,
+    OTHER
+};
 
 constexpr size_t MEM_SIZE = 1000;
 
@@ -82,83 +87,60 @@ private:
     int statement() 
     {
         if(iter == std::cend(tokens_)) return 0;
-
-        // switch ((*iter)->type())
-        // {
-        // case token_type::INPUT:
-        //     input();
-        //     break;
-        // case token_type::OUTPUT:
-        //     output();
-        //     break;
-        // case token_type::ID:
-        //     assign(static_cast<IdToken&>(**iter).id());
-        //     break;
-        // case token_type::OBRAC:
-        //     if(**std::next(iter) == token_type::ASSIGN) 
-        //     {
-        //         assign("c");
-        //     }
-        //     break;
-        // case token_type::CBRAC:
-        //     if(**std::next(iter) == token_type::OBRAC &&
-        //         **std::next(iter, 2) == token_type::ASSIGN)
-        //     {
-        //         nextToken();
-        //         assign("x");
-        //     }
-        //     break;
-        // default:
-        //     break;
-        // }
-        // nextToken();
-        // if(**iter == token_type::SCOLON) {
-        //     nextToken();
-        //     return statement();
-        // }
-        // throw ram_error("Syntax error: expected ;");
-
-        // input expr;
-        if(**iter == token_type::INPUT) {
+        //input expr;
+        else if(**iter == token_type::INPUT)
+        {
             input();
         }
-        // print expr;
-        else if(**iter == token_type::OUTPUT) {
+        //print expr;
+        else if(**iter == token_type::OUTPUT)
+        {
             output();
         }
-        // expr = expr;
-        else {
-            auto lhs = expr();
-
-            if (lhs < 0 || lhs > global_memory_.size()) throw ram_error("out of memory");
-
-            nextToken();
-            if(**iter == token_type::ASSIGN) {
-                auto rhs = expr();
-                if(lhs)
-                global_memory_[lhs] = rhs;
-                std::cout << global_memory_[lhs] << std::endl;
-            }
+        //var = expr;
+        else if(**iter == token_type::ID)
+        {
+            varAssign(varType::OTHER);
         }
-        nextToken();
-        if(**iter == token_type::SCOLON) {
+        // [ = expr;
+        else if(**iter == token_type::OBRAC)
+        {
+            varAssign(varType::X);
+        }
+        // ][ = expr;
+        else if(**iter == token_type::CBRAC &&
+           **std::next(iter) == token_type::OBRAC) 
+        {
+            varAssign(varType::C);
+        }
+        // expr = expr
+        else 
+        {
+            exprAssign();
+        }
+        if(**iter == token_type::SCOLON) 
+        {
             nextToken();
             return statement();
         }
-        throw ram_error("Syntax error: expected ;");
+        else
+            throw ram_error("Syntax error: expected ;");
     }
 
     int input() 
     {
         nextToken();
-        auto res = expr();
+        
+        int input = 0;
+        std::cin >> input;
         if(**iter == token_type::ID) {
-
             auto id = static_cast<IdToken&>(**iter).id();
-
-            int tmp = 0;
-            std::cin >> tmp;
-            var_store_.emplace(id, tmp);
+            var_store_.emplace(id, input);
+        }
+        else 
+        {
+            auto res = expr();
+            global_memory_[res] = input;
         }
         return 0;
     }
@@ -166,28 +148,40 @@ private:
     int output() 
     {
         nextToken();
-        if(**iter == token_type::ID) {
-            auto var = var_store_.at(static_cast<IdToken&>(**iter).id());   
-            *out_stream_ << var << std::endl;  
-        }
-        else if(**iter == token_type::OBRAC &&
-                **std::next(iter) == token_type::SCOLON) {
-            auto var = var_store_.at("c");
-            *out_stream_ << var << std::endl;
-        }
-        else if(**iter == token_type::CBRAC &&
-                **std::next(iter) == token_type::OBRAC &&
-                **std::next(iter, 2) == token_type::SCOLON) {
-            auto var = var_store_.at("x");
-            *out_stream_ << var << std::endl;
-            nextToken();
-        }
-        else {
-            auto var = expr();   
-            *out_stream_ << var << std::endl;
-        }
-
+        *out_stream_ << expr() << std::endl;
         return 0;
+    }
+
+    void exprAssign() {
+        auto lhs = expr();
+
+        if (lhs < 0 || lhs > global_memory_.size()) throw ram_error("Out of memory");
+
+        nextToken();
+        if(**iter == token_type::ASSIGN) {
+            auto rhs = expr();
+            if(lhs)
+            global_memory_[lhs] = rhs;
+            std::cout << global_memory_[lhs] << std::endl;
+        }
+    }
+
+    void varAssign(varType var_type) {
+        switch (var_type)
+        {
+        case varType::X:
+            nextToken();
+            assign("x");
+            break;
+        case varType::C:
+            assign("c");
+            break;
+        case varType::OTHER:
+            assign(static_cast<IdToken&>(**iter).id());
+            break;
+        default:
+            break;
+        }
     }
 
     int assign(std::string id) 
@@ -199,7 +193,7 @@ private:
                 nextToken();
 
                 int res = expr();
-                if(res < 0) throw ram_error("Negative index");
+                if(res < 0) throw ram_error("Out of memory");
                 
                 var_store_.at(id) = global_memory_.at(res);
             }
@@ -207,7 +201,7 @@ private:
                 nextToken();
 
                 int res = expr();
-                if(res < 0) throw ram_error("Negative index");
+                if(res < 0) throw ram_error("Out of memory");
                 var_store_.emplace(id, global_memory_.at(res));
             }
         }
@@ -219,42 +213,27 @@ private:
         if (emptyExpr(iter)) throw ram_error("Syntax error");
 
         int res{};
-        // id[expr]
-//        if(**iter == token_type::ID &&
-//           **std::next(iter) == token_type::OBRAC)
-//        {
-//            auto id = static_cast<IdToken&>(**iter).id();
-//            nextToken();
-//            nextToken();
-//            auto tmp = expr();
-//            if(**iter == token_type::CBRAC)
-//            {
-//                return var_store_.at(id) + tmp;
-//            }
-//        }
-        //expr
-//        else {
-            auto tmp = factor();
-            while(**iter == token_type::ADD ||
-                  **iter == token_type::SUB)
+
+        int tmp = factor();
+        while(**iter == token_type::ADD ||
+              **iter == token_type::SUB)
+        {
+            switch ((*iter)->type())
             {
-                switch ((*iter)->type())
-                {
-                case token_type::ADD:
-                    nextToken();
-                    tmp += expr();
-                    break;
-                case token_type::SUB:
-                    nextToken();
-                    tmp -= expr();
-                    break;
-                default:
-                    break;
-                }
+            case token_type::ADD:
+                nextToken();
+                tmp += expr();
+                break;
+            case token_type::SUB:
+                nextToken();
+                tmp -= expr();
+                break;
+            default:
+                break;
             }
-            res = tmp;
-//        }
-        nextToken();
+        }
+        res = tmp;
+
         return res;
     }
 
@@ -273,12 +252,29 @@ private:
 //            }
 //            res = tmp;
 //        }
-        if(**iter == token_type::VALUE) {
+        if(**iter == token_type::ID)
+        {
+            auto id = static_cast<IdToken&>(**iter).id();
+            nextToken();
+            if(**iter == token_type::OBRAC) {
+                return var_store_.at(id) + expr();
+            }
+            return var_store_.at(id);
+        }
+        else if(**iter == token_type::OBRAC) {
+            nextToken();
+            int res = expr();
+            if(**iter == token_type::CBRAC) {
+                nextToken();
+                return res;
+            }
+        }
+        else if(**iter == token_type::VALUE) {
             res = static_cast<ValueToken&>(**iter).value();
         }
-//        if(**iter == token_type::ID) {
-//            res = var_store_.at(static_cast<IdToken&>(**iter).id());
-//        }
+        else if(**iter == token_type::ID) {
+            res = var_store_.at(static_cast<IdToken&>(**iter).id());
+        }
 //        // [ as c
 //        if(**iter == token_type::OBRAC) {
 //            res = var_store_.at("c");
@@ -288,7 +284,8 @@ private:
 //            nextToken();
 //            res = var_store_.at("x");
 //        }
-        else throw ram_error("Syntax error");
+        else
+            throw ram_error("Syntax error");
 
         nextToken();
         return res;
