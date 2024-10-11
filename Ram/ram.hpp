@@ -6,51 +6,32 @@
 #include <memory>
 #include <numeric>
 #include <exception>
-#include <filesystem>
 #include <sstream>
-#include <fstream>
 #include "token.hpp"
 
 namespace my_impl {
 
-namespace utility {
+class ram_error final: std::exception 
+{
+public:
+    ram_error(const std::string& what_arg):what_(what_arg) {}
 
-template <typename T, typename U>
-inline void print(const std::unordered_map<T, U>& map) {
-    for(auto&& [key, value] : map) {
-        std::cout << "key: " << key 
-        << " with value: " << value <<  std::endl;
-    }
-    
-}
-
-inline std::stringstream readFile(const std::filesystem::path& filePath) {
-    if (!std::filesystem::exists(filePath)) {
-        throw std::runtime_error(std::string("File does not exist: ") + filePath.string());
+    const char* what() const noexcept override {
+        return what_.c_str();
     }
 
-    std::ifstream file(filePath);
-    if (!file.is_open()) {
-        throw std::runtime_error(std::string("Failed to open file: ") + filePath.string());
-    }
+private:
+    std::string what_;
+};
 
-    std::string line;
-    std::stringstream stream;
-    while (std::getline(file, line)) {
-        stream << line << std::endl;
-    }
-    file.close();
-    return stream;
-}
-
-} //namespace utility
 
 constexpr size_t MEM_SIZE = 1000;
 
 inline std::unordered_map<std::string, int> var_store_;
 inline std::vector<int> global_memory_(MEM_SIZE);
 
-class RamParser final {
+class RamParser final 
+{
 public:
     RamParser():out_stream_(std::make_unique<std::stringstream>())
     {
@@ -62,12 +43,23 @@ public:
         tokens_.emplace_back(std::move(token));
     }
 
-    void parse() {
+    void parse() 
+    {
         c_it_ = std::cbegin(tokens_);
-        statement();
+
+        try {
+            statement();
+        }
+        catch(const ram_error& ram_excep) {
+            *out_stream_ << ram_excep.what() << std::endl;
+        }
+        catch(const std::exception& excep) {
+            throw;
+        }  
     }
     
-    std::unique_ptr<std::stringstream> getStream() noexcept {
+    std::unique_ptr<std::stringstream> getStream() noexcept 
+    {
         return std::move(out_stream_);
     }
 
@@ -124,7 +116,7 @@ private:
             nextToken();
             return statement();
         }
-        throw std::runtime_error("Syntax error: expected ;");
+        throw ram_error("Syntax error: expected ;");
     }
 
     int input() 
@@ -168,7 +160,8 @@ private:
         return 0;
     }
 
-    int assign(std::string id) {
+    int assign(std::string id) 
+    {
         nextToken();
 
         if(**c_it_ == token_type::ASSIGN) {
@@ -176,7 +169,7 @@ private:
                 nextToken();
 
                 int res = expr();
-                if(res < 0) throw std::runtime_error("Negative index");
+                if(res < 0) throw ram_error("Negative index");
                 
                 var_store_.at(id) = global_memory_.at(res);
             }
@@ -184,15 +177,16 @@ private:
                 nextToken();
 
                 int res = expr();
-                if(res < 0) throw std::runtime_error("Negative index");
+                if(res < 0) throw ram_error("Negative index");
                 var_store_.emplace(id, global_memory_.at(res));
             }
         }
         return 0;
     }
 
-    int expr() {
-        if (emptyExpr(c_it_)) throw std::runtime_error("Syntax error");
+    int expr() 
+    {
+        if (emptyExpr(c_it_)) throw ram_error("Syntax error");
 
         int res{};
         // id[expr]
@@ -233,7 +227,8 @@ private:
         return res;
     }
 
-    int factor() {
+    int factor() 
+    {
         auto res = 0;
         //[expr]
         if(notC(c_it_))
@@ -263,7 +258,7 @@ private:
             res = var_store_.at("x");
         }
         else     
-            throw std::runtime_error("Syntax error");
+            throw ram_error("Syntax error");
 
         nextToken();
         return res;

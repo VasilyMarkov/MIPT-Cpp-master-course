@@ -1,5 +1,6 @@
 #include <iostream>
 #include "lexer.hpp"
+#include "utility.hpp"
 
 namespace fs = std::filesystem;
 

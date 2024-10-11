@@ -1,7 +1,6 @@
 #ifndef TOKEN_H
 #define TOKEN_H
-#include <iostream>
-
+#include <string>
 
 namespace my_impl
 {
