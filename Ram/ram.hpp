@@ -45,7 +45,7 @@ public:
 
     void pushToken(std::unique_ptr<iToken> token) 
     {
-        tokens_.emplace_back(std::move(token));
+        tokens_.push_back(std::move(token));
     }
 
     void parse() 
@@ -194,6 +194,7 @@ private:
                 nextToken();
 
                 int res = expr();
+                
                 if(res < 0) throw ram_error("Out of memory");
                 
                 var_store_.at(id) = global_memory_.at(res);
@@ -202,7 +203,9 @@ private:
                 nextToken();
 
                 int res = expr();
+
                 if(res < 0) throw ram_error("Out of memory");
+
                 var_store_.emplace(id, global_memory_.at(res));
             }
         }
@@ -280,7 +283,9 @@ private:
             }
             // [1+][] as [1+x] 
             // have to look back (my best idea ever)
-            if(**iter == token_type::CBRAC && (**std::next(iter, -3) == token_type::ADD || **std::next(iter, -3) == token_type::SUB)) 
+            if(**iter == token_type::CBRAC                  && 
+              (**std::next(iter, -3) == token_type::ADD     || 
+               **std::next(iter, -3) == token_type::SUB)) 
             {
                 return var_store_.at("x");
             }
