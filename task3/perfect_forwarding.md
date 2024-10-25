@@ -43,4 +43,4 @@ T&& forward(typename std::remove_reference<T>::type& t) noexcept
 ```
 Transformation chain:
 
-`std::remove_reference<const int>::type& -> const int& -> static_cast<&&>(const int&) -> const int& -> (const int&)&& -> const int&`
+`const int -> std::remove_reference<const int>::type& -> const int& -> static_cast<&&>(const int&) -> const int& -> (const int&)&& -> const int&`
