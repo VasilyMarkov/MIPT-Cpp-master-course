@@ -1,5 +1,16 @@
 # Perfect Forward
+### Example:
 
+```C++
+int g(int &&t) { return 1; }
+int g(int &t) { return 2; }
+
+template <typename T>
+void/*int?*/ h(T &&t) { g(std::forward<T> (t)); }
+
+const int x = 1; int z = h(x); // ???
+```
+### Explanation
 ```C++
 template <typename T>
 void h(T&& t) {
