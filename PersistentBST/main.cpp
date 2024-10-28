@@ -1,16 +1,16 @@
 #include <iostream>
-#include <fstream>
 #include <vector>
-#include <string>
-#include "string_twine.hpp"
+#include "persistent_bst.hpp"
+#include "utility.hpp"
 
-int main(int argc, char* argv[]) {
-    std::string line;
-    my_impl::StringTwine twine("");
 
-    while (std::getline(std::cin, line)) {
-        twine.concat(line);
-    }
-    std::cout << twine.to_string() << std::endl;
-    return 0;
+int main() {
+    my_impl::PersistentBST<int> pbst;
+    pbst.insert(3);
+    pbst.insert(1);
+    pbst.insert(2);
+
+     auto flatten = pbst.flatten();
+     std::vector<int> result = {1,2,3};
+     pbst.print();
 }

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-cmake --preset debug
-cmake --build --preset debug
+cmake --preset test
+cmake --build --preset test
