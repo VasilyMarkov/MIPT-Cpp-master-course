@@ -3,7 +3,6 @@
 #include "persistent_bst.hpp"
 #include "utility.hpp"
 
-
 int main() {
     my_impl::PersistentBST<int> pbst;
     pbst.insert(3);
@@ -13,4 +12,5 @@ int main() {
      auto flatten = pbst.flatten();
      std::vector<int> result = {1,2,3};
      pbst.print();
+    
 }
