@@ -9,6 +9,13 @@
 namespace my_impl
 {
 
+template<typename Cont>
+concept HasBeginEnd = requires (Cont container) 
+{
+    { container.begin() } -> std::input_iterator;
+    { container.end() } -> std::input_iterator;
+};
+
 template<typename T>
 class BstIterator {
 public:
@@ -44,22 +51,28 @@ class PersistentBST {
         Node_ptr right_;
 
         auto operator<=>(const Node&) const = default;
+
     };
 public:
-    PersistentBST(){}
+    PersistentBST() {}
 
-    PersistentBST(const std::initializer_list<T>& list){
+    template <HasBeginEnd Cont>
+    explicit PersistentBST(const Cont& cont)
+    {
+        for(auto&& el:cont) {
+            insert(el);
+        }
+    }
+
+    explicit PersistentBST(const std::initializer_list<T>& list)
+    {
         for(auto&& el:list) {
             insert(el);
         }
     }
 
-    void insert(T value) {
-        if(empty()) 
-            head_ = std::make_shared<Node>(value);
-        else 
-            insertRecursive(head_, value);
-    }
+    void insert(T value) { insertRecursive(head_, value);}
+    
     void print() {
         inorderDump(head_);
         std::cout << std::endl;
@@ -75,15 +88,25 @@ public:
         return head_ == nullptr;
     }
 
+    void printTemp() {
+        // inorderDump(temp_->head_);
+        // std::cout << std::endl;
+    }
+
     friend bool operator==(const PersistentBST& lhs, const PersistentBST& rhs) noexcept {
         return inorderEqual(lhs.head_, rhs.head_);
     }
     
+    
 private:
     void insertRecursive(Node_ptr node, T value) {
-//        buffer_head_ = std::make_shared<Node>(*node);
-//        buffer_head_->left_ = node->lef;
-//        buffer_head_->right_ = node;
+
+        if(empty()) 
+        {
+            head_ = std::make_shared<Node>(value);
+            return;
+        }
+
         if(value < node->value_) {
             if(node->left_ == nullptr) {
                 node->left_ = std::make_shared<Node>(value);
@@ -105,6 +128,7 @@ private:
     void inorderFlat(Node_ptr root, std::vector<T>& vec) 
     {
         if (root == nullptr) return;
+
         inorderFlat(root->left_, vec);
         vec.push_back(root->value_);
         inorderFlat(root->right_, vec);
@@ -131,6 +155,9 @@ private:
     Node_ptr head_;
     Node_ptr buffer_head_;
 };
+
+template<template <typename> typename Cont, typename T>
+PersistentBST(const Cont<T>&) -> PersistentBST<T>;
 
 } // namespace my_impl
 
