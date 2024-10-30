@@ -6,6 +6,7 @@
 #include <vector>
 #include <type_traits>
 #include <utility>
+#include <iomanip>
 
 namespace my_impl
 {
@@ -55,7 +56,7 @@ class PersistentBST {
     };
 public:
     PersistentBST() {}
-    explicit PersistentBST(Node_ptr new_head) noexcept: head_(new_head) {}
+    explicit PersistentBST(Node_ptr new_root) noexcept: root_(new_root) {}
 
     template <HasBeginEnd Cont>
     PersistentBST(const Cont& cont)
@@ -72,67 +73,71 @@ public:
         }
     }
 
-    void insert(T value) 
-    { 
-        if(empty()) head_ = std::make_shared<Node>(value); 
-
-        else 
-        {
-            temp_head_ = std::make_shared<Node>(*head_); 
-            insertRecursive(head_, value);
-        }
-        size_++;
+    void swap(PersistentBST& other) noexcept
+    {
+        std::swap(root_, other->root_);
+        std::swap(size_, other->size_);
     }
     
-    void testInsert(T value) {
-        temp_bst_ = std::make_unique<PersistentBST>(testInsertRecursive(head_, value));
+    void insert(T value) {
+
+        if(empty()) {
+            root_ = std::make_shared<Node>(value);
+            ++size_;
+            return;
+        }
+
+        temp_root_ = insertRecursive(root_, value);
+
+        std::swap(temp_root_, root_);
+
+        ++size_;
     }
 
-    void print() 
+    void printNewTree() 
     {
-        dump(head_);
+        dump(temp_root_);
+        std::cout << "-----" << std::endl;
     }
 
-    std::vector<T> flatten() {
+    void printOldTree() 
+    {
+        dump(root_);
+        std::cout << "-----" << std::endl;
+    }
+
+    std::vector<T> flatten() 
+    {
         std::vector<T> result;
-        inorderFlat(head_, result);
+        inorderFlat(root_, result);
         return result;
     }
 
-    bool empty() const noexcept {
-        return size_ == 0;
-    }
-
-    void printTemp() {
-        // inorderDump(temp_->head_);
-        // std::cout << std::endl;
-    }
+    bool empty() const noexcept { return size_ == 0; }
 
     friend bool operator==(const PersistentBST& lhs, const PersistentBST& rhs) noexcept {
-        return inorderEqual(lhs.head_, rhs.head_);
+        return inorderEqual(lhs.root_, rhs.root_);
     }
     
     
 private:
-    void insertRecursive(Node_ptr node, T value) {
-        if(value < node->value_) {
-            if(node->left_ == nullptr) {
-                
+    Node_ptr insertRecursive(Node_ptr node, T value) 
+    {
+        if(node == nullptr) {
+            return std::make_shared<Node>(value);   
+        }
 
-                node->left_ = std::make_shared<Node>(value);
-            }
-            else {
-                insertRecursive(node->left_, value);
-            }   
+        if(value < node->value_) 
+        {
+            auto new_left = insertRecursive(node->left_,value);
+            return std::make_shared<Node>(node->value_, new_left, node->right_);
         }
-        else {
-            if(node->right_ == nullptr) {
-                node->right_ = std::make_shared<Node>(value);
-            }
-            else {
-                insertRecursive(node->right_, value);
-            } 
+        else if(value > node->value_) 
+        {
+            auto new_right = insertRecursive(node->right_,value);
+            return std::make_shared<Node>(node->value_, node->left_, new_right);
         }
+        else return node;
     }
 
     void inorderFlat(Node_ptr root, std::vector<T>& vec) 
@@ -143,7 +148,7 @@ private:
         vec.push_back(root->value_);
         inorderFlat(root->right_, vec);
     } 
-    
+
     void dump(Node_ptr root, const std::string& prefix = "", bool isTail = true) {
         if (!root) {
             std::cout << prefix << (isTail ? "└──" : "├──") << "n" << std::endl;
@@ -154,9 +159,9 @@ private:
 
         std::string newPrefix = prefix + (isTail ? "    " : "│   ");
 
-        dump(root->left_, newPrefix, root->right_ == nullptr);
-        dump(root->right_, newPrefix, true);
-    } 
+        dump(root->right_, newPrefix, root->left_ == nullptr);
+        dump(root->left_, newPrefix, true);
+    }
 
     friend bool inorderEqual(Node_ptr lhs, Node_ptr rhs) noexcept
     {
@@ -168,8 +173,8 @@ private:
         return inorderEqual(lhs->left_, rhs->left_) && inorderEqual(lhs->right_, rhs->right_);
     }
 
-    Node_ptr head_;
-    Node_ptr temp_head_;
+    Node_ptr root_;
+    Node_ptr temp_root_ = nullptr;
     size_t size_{0};
 };
 
