@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <type_traits>
+#include <utility>
 
 namespace my_impl
 {
@@ -41,37 +42,41 @@ class PersistentBST {
 
     class Node {
     public:
-        Node(T value) noexcept: value_(value) {}
-        Node(T value, Node_ptr left, Node_ptr right):
-            value_(value), 
-            left_(left),
-            right_(right) {}
+        explicit Node(T value) noexcept: value_(value) {}
+
         T value_;
         Node_ptr left_;
         Node_ptr right_;
-
-        auto operator<=>(const Node&) const = default;
-
     };
 public:
     PersistentBST() {}
 
     template <HasBeginEnd Cont>
-    explicit PersistentBST(const Cont& cont)
+    PersistentBST(const Cont& cont)
     {
         for(auto&& el:cont) {
             insert(el);
         }
     }
 
-    explicit PersistentBST(const std::initializer_list<T>& list)
+    PersistentBST(const std::initializer_list<T>& list)
     {
         for(auto&& el:list) {
             insert(el);
         }
     }
 
-    void insert(T value) { insertRecursive(head_, value);}
+    void insert(T value) 
+    { 
+        if(empty()) head_ = std::make_shared<Node>(value); 
+
+        else 
+        {
+            temp_head_ = std::make_shared<Node>(*head_); 
+            insertRecursive(head_, value);
+        }
+        size_++;
+    }
     
     void print() {
         inorderDump(head_);
@@ -85,7 +90,7 @@ public:
     }
 
     bool empty() const noexcept {
-        return head_ == nullptr;
+        return size_ == 0;
     }
 
     void printTemp() {
@@ -100,15 +105,10 @@ public:
     
 private:
     void insertRecursive(Node_ptr node, T value) {
-
-        if(empty()) 
-        {
-            head_ = std::make_shared<Node>(value);
-            return;
-        }
-
         if(value < node->value_) {
             if(node->left_ == nullptr) {
+                
+
                 node->left_ = std::make_shared<Node>(value);
             }
             else {
@@ -153,7 +153,8 @@ private:
     }
 
     Node_ptr head_;
-    Node_ptr buffer_head_;
+    Node_ptr temp_head_;
+    size_t size_{0};
 };
 
 template<template <typename> typename Cont, typename T>
