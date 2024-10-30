@@ -4,7 +4,5 @@
 #include "utility.hpp"
 
 int main() {
-    my_impl::PersistentBST pbst = {4,5};
-    // pbst.printOldTree();
-    pbst.printNewTree();
+    
 }

@@ -19,11 +19,11 @@ concept HasBeginEnd = requires (Cont container)
 };
 
 template <std::totally_ordered T>
-class PersistentBST {
+class PersistentBST final {
     class Node;
     using Node_ptr = std::shared_ptr<Node>;
 
-    class Node {
+    class Node final {
     public:
         explicit Node(T value) noexcept: value_(value) {}
         
@@ -32,11 +32,27 @@ class PersistentBST {
             left_(left), 
             right_(right) {}
 
+        Node(const Node& other): 
+            value_(other.value_), 
+            left_(other.left_), 
+            right_(other.right_) {}
+        
+        Node& operator=(const Node& other) {
+            Node(other) temp;
+        }
+        
+        void swap(Node& other) noexcept {
+            std::swap(value_, other);
+            std::swap(left_, other.left_);
+            
+        }
+
+        friend PersistentBST;
+    private:
         T value_;
         Node_ptr left_;
         Node_ptr right_;
     };
-
 public:
     PersistentBST() {}
     explicit PersistentBST(Node_ptr new_root) noexcept: root_(new_root) {}
@@ -62,8 +78,9 @@ public:
         std::swap(size_, other->size_);
     }
     
-    void insert(T value) {
-
+    void insert(const T& value) 
+    {
+        std::cout << "const T&" << std::endl;
         if(empty()) {
             root_ = std::make_shared<Node>(value);
             ++size_;
@@ -71,6 +88,22 @@ public:
         }
 
         temp_root_ = insertRecursive(root_, value);
+        std::swap(temp_root_, root_);
+        active_root_ = root_;
+
+        ++size_;
+    }
+
+    void insert(T&& value) 
+    {
+        std::cout << "T&&" << std::endl;
+        if(empty()) {
+            root_ = std::make_shared<Node>(std::move(value));
+            ++size_;
+            return;
+        }
+
+        temp_root_ = insertRecursive(root_, std::move(value));
         std::swap(temp_root_, root_);
         active_root_ = root_;
 
@@ -86,29 +119,13 @@ public:
         } 
     }
 
-    void redo() noexcept
-    {
-        if(size_ >= 2) active_root_ = root_;
-    }
-
-    void printNewTree() 
-    {
-        dump(temp_root_);
-        std::cout << "-----" << std::endl;
-    }
-
-    void printOldTree() 
-    {
-        dump(root_);
-        std::cout << "-----" << std::endl;
-    }
+    void redo() noexcept { if(size_ >= 2) active_root_ = root_; }
 
     void print() 
     {
         dump(active_root_);
         std::cout << "-----" << std::endl;
     }
-
 
     std::vector<T> flatten() 
     {
@@ -123,13 +140,12 @@ public:
         return inorderEqual(lhs.active_root_, rhs.active_root_);
     }
     
-    
 private:
-    Node_ptr insertRecursive(Node_ptr node, T value) 
+    Node_ptr insertRecursive(Node_ptr node, const T& value) 
     {
-        if(node == nullptr) {
-            return std::make_shared<Node>(value);   
-        }
+        std::cout << "const insert&" << std::endl;
+
+        if(!node) return std::make_shared<Node>(value);   
 
         if(value < node->value_) 
         {
@@ -144,16 +160,35 @@ private:
         else return node;
     }
 
+    Node_ptr insertRecursive(Node_ptr node, T&& value) 
+    {
+        std::cout << "insert&&" << std::endl;
+        if(!node) return std::make_shared<Node>(std::move(value));   
+
+        if(value < node->value_) 
+        {
+            auto new_left = insertRecursive(node->left_, std::move(value));
+            return std::make_shared<Node>(node->value_, new_left, node->right_);
+        }
+        else if(value > node->value_) 
+        {
+            auto new_right = insertRecursive(node->right_, std::move(value));
+            return std::make_shared<Node>(node->value_, node->left_, new_right);
+        }
+        else return node;
+    }
+
     void inorderFlat(Node_ptr root, std::vector<T>& vec) 
     {
-        if (root == nullptr) return;
+        if (!root) return;
 
         inorderFlat(root->left_, vec);
         vec.push_back(root->value_);
         inorderFlat(root->right_, vec);
     } 
 
-    void dump(Node_ptr root, const std::string& prefix = "", bool isTail = true) {
+    void dump(Node_ptr root, const std::string& prefix = "", bool isTail = true) 
+    {
         if (!root) {
             std::cout << prefix << (isTail ? "└──" : "├──") << "n" << std::endl;
             return;
@@ -163,14 +198,14 @@ private:
 
         std::string newPrefix = prefix + (isTail ? "    " : "│   ");
 
-        dump(root->right_, newPrefix, root->left_ == nullptr);
+        dump(root->right_, newPrefix, !root->left_);
         dump(root->left_, newPrefix, true);
     }
 
     friend bool inorderEqual(Node_ptr lhs, Node_ptr rhs) noexcept
     {
-        if (lhs == nullptr && rhs == nullptr) return true;
-        if (lhs == nullptr || rhs == nullptr) return false;
+        if (!lhs && !rhs) return true;
+        if (!lhs || !rhs) return false;
 
         if (lhs->value_ != rhs->value_) return false;
 
@@ -186,6 +221,8 @@ private:
 
 template<template <typename> typename Cont, typename T>
 PersistentBST(const Cont<T>&) -> PersistentBST<T>;
+
+
 
 } // namespace my_impl
 

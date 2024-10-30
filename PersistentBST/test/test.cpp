@@ -4,6 +4,41 @@
 #include "persistent_bst.hpp"
 #include "utility.hpp"
 
+class OrderedType final {
+public:
+    explicit OrderedType(int value):value_(value) {std::cout << "def ctr" << std::endl;}
+    
+    OrderedType(const OrderedType& other): value_(other.value_) 
+    {std::cout << "copy ctr" << std::endl;}
+    
+    OrderedType(OrderedType&& other): value_(other.value_) 
+    {std::cout << "move ctr" << std::endl;}
+    
+    OrderedType& operator=(const OrderedType& other) 
+    {value_ = other.value_; std::cout << "copy operator" << std::endl; return *this;}
+    
+    OrderedType& operator=(OrderedType&& other) 
+    {value_ = other.value_; std::cout << "move operator" << std::endl; return *this;}
+    
+    ~OrderedType() {std::cout << "dtr" << std::endl;}
+
+    auto operator<=>(const OrderedType&) const = default;
+
+    friend std::ostream& operator<<(std::ostream& os, const OrderedType& ordered_type) 
+    {
+        os << "OrderedType: " << ordered_type.value_;
+        return os;
+    }
+
+private:
+    int value_{};
+};
+
+struct NotOrderType {
+    int x;
+    int y;
+};
+
 TEST(Pbst, insertTest) {
     my_impl::PersistentBST<int> pbst;
     pbst.insert(3);
@@ -67,6 +102,38 @@ TEST(Pbst, undoRedoTest) {
 
     pbst.redo();
     EXPECT_TRUE(pbst == pbst_new);
+}
+
+// TEST(Pbst, NonIntergalTypeTest) {
+//     my_impl::PersistentBST<OrderedType> pbst;
+    
+//     OrderedType foo{1};
+//     OrderedType bar{2};
+//     OrderedType foo_bar{3};
+
+//     pbst.insert(foo_bar);
+//     pbst.insert(foo);
+//     pbst.insert(bar);
+
+//     std::vector<OrderedType> data = {OrderedType(1), OrderedType(2), OrderedType(3)};
+
+//     EXPECT_EQ(pbst.flatten(), data);
+// }
+
+TEST(Pbst, NonIntergalTypeTest) {
+    my_impl::PersistentBST<OrderedType> pbst;
+    
+    OrderedType foo{1};
+
+    pbst.insert(foo);
+
+}
+
+TEST(Pbst, moveNonIntergalTypeTest) {
+    my_impl::PersistentBST<OrderedType> pbst;
+
+    pbst.insert(OrderedType{1});
+
 }
 
 int main(int argc, char **argv) {
