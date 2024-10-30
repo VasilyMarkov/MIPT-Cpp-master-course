@@ -56,9 +56,8 @@ TEST(Pbst, bigDataTest) {
 }
 
 TEST(Pbst, bufferTest) {
-    // my_impl::PersistentBST pbst = {3};
-    // pbst.printTemp();
-    // temp.print();
+    my_impl::PersistentBST pbst = {7,4,8,3,6,5};
+    pbst.print();
 }
 
 int main(int argc, char **argv) {

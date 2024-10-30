@@ -43,6 +43,11 @@ class PersistentBST {
     class Node {
     public:
         explicit Node(T value) noexcept: value_(value) {}
+        
+        Node(T value, Node_ptr left, Node_ptr right) noexcept:
+            value_(value), 
+            left_(left), 
+            right_(right) {}
 
         T value_;
         Node_ptr left_;
@@ -50,6 +55,7 @@ class PersistentBST {
     };
 public:
     PersistentBST() {}
+    explicit PersistentBST(Node_ptr new_head) noexcept: head_(new_head) {}
 
     template <HasBeginEnd Cont>
     PersistentBST(const Cont& cont)
@@ -78,9 +84,13 @@ public:
         size_++;
     }
     
-    void print() {
-        inorderDump(head_);
-        std::cout << std::endl;
+    void testInsert(T value) {
+        temp_bst_ = std::make_unique<PersistentBST>(testInsertRecursive(head_, value));
+    }
+
+    void print() 
+    {
+        dump(head_);
     }
 
     std::vector<T> flatten() {
@@ -134,12 +144,18 @@ private:
         inorderFlat(root->right_, vec);
     } 
     
-    void inorderDump(Node_ptr root) 
-    {
-        if (root == nullptr) return;
-        inorderDump(root->left_);
-        std::cout << root->value_ << ' ';
-        inorderDump(root->right_);
+    void dump(Node_ptr root, const std::string& prefix = "", bool isTail = true) {
+        if (!root) {
+            std::cout << prefix << (isTail ? "└──" : "├──") << "n" << std::endl;
+            return;
+        }
+
+        std::cout << prefix << (isTail ? "└──" : "├──") << root->value_ << std::endl;
+
+        std::string newPrefix = prefix + (isTail ? "    " : "│   ");
+
+        dump(root->left_, newPrefix, root->right_ == nullptr);
+        dump(root->right_, newPrefix, true);
     } 
 
     friend bool inorderEqual(Node_ptr lhs, Node_ptr rhs) noexcept
