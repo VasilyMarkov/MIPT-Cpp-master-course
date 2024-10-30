@@ -174,7 +174,8 @@ private:
     }
 
     Node_ptr root_;
-    Node_ptr temp_root_ = nullptr;
+    Node_ptr temp_root_;
+    Node_ptr active_root_;
     size_t size_{0};
 };
 

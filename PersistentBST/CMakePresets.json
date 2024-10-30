@@ -46,7 +46,7 @@
         "inherits": "test",
         "cacheVariables": {
           "SANITIZE": "ON",
-          "CMAKE_CXX_FLAGS_DEBUG": "-g -O2 -Wall -Wextra -fsanitize=address"
+          "CMAKE_CXX_FLAGS_DEBUG": "-g -O2 -Wall -Wextra -fsanitize=address,undefined"
         }
       }
     ],

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-cmake --preset test
-cmake --build --preset test
+cmake --preset sanitize_test
+cmake --build --preset sanitize_test
