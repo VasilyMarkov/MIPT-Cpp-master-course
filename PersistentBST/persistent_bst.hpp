@@ -18,24 +18,6 @@ concept HasBeginEnd = requires (Cont container)
     { container.end() } -> std::input_iterator;
 };
 
-template<typename T>
-class BstIterator {
-public:
-    explicit BstIterator(T* ptr) noexcept: ptr_(ptr) {}
-
-    T& operator*() { return *ptr_; }
-
-    bool operator!=(const BstIterator& other) 
-    const noexcept { return ptr_ != other.ptr; }
-
-    BstIterator& operator++() {
-        ptr_++;
-        return *this;
-    }
-private:
-    T* ptr_;
-};
-
 template <std::totally_ordered T>
 class PersistentBST {
     class Node;
@@ -54,6 +36,7 @@ class PersistentBST {
         Node_ptr left_;
         Node_ptr right_;
     };
+
 public:
     PersistentBST() {}
     explicit PersistentBST(Node_ptr new_root) noexcept: root_(new_root) {}
@@ -88,10 +71,24 @@ public:
         }
 
         temp_root_ = insertRecursive(root_, value);
-
         std::swap(temp_root_, root_);
+        active_root_ = root_;
 
         ++size_;
+    }
+
+    void undo() noexcept
+    {
+        if(size_ > 1 && !undo_cnt_) 
+        {   
+            active_root_ = temp_root_;
+            ++undo_cnt_;
+        } 
+    }
+
+    void redo() noexcept
+    {
+        if(size_ >= 2) active_root_ = root_;
     }
 
     void printNewTree() 
@@ -106,17 +103,24 @@ public:
         std::cout << "-----" << std::endl;
     }
 
+    void print() 
+    {
+        dump(active_root_);
+        std::cout << "-----" << std::endl;
+    }
+
+
     std::vector<T> flatten() 
     {
         std::vector<T> result;
-        inorderFlat(root_, result);
+        inorderFlat(active_root_, result);
         return result;
     }
 
     bool empty() const noexcept { return size_ == 0; }
 
     friend bool operator==(const PersistentBST& lhs, const PersistentBST& rhs) noexcept {
-        return inorderEqual(lhs.root_, rhs.root_);
+        return inorderEqual(lhs.active_root_, rhs.active_root_);
     }
     
     
@@ -176,7 +180,8 @@ private:
     Node_ptr root_;
     Node_ptr temp_root_;
     Node_ptr active_root_;
-    size_t size_{0};
+    size_t size_{};
+    size_t undo_cnt_{};
 };
 
 template<template <typename> typename Cont, typename T>

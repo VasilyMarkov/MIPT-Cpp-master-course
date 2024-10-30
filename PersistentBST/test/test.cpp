@@ -57,18 +57,16 @@ TEST(Pbst, bigDataTest) {
     EXPECT_EQ(pbst.flatten(), out_data);
 }
 
-TEST(Pbst, bufferTest) {
-    // my_impl::PersistentBST pbst = {4,2,6,1,3,5,7};
-    my_impl::PersistentBST<int> pbst;
-    pbst.insert(4);
-    pbst.printOldTree();
-    pbst.printNewTree();
-    pbst.insert(2);
-    pbst.printOldTree();
-    pbst.printNewTree();
-    pbst.insert(6);
-    pbst.printOldTree();
-    pbst.printNewTree();
+TEST(Pbst, undoRedoTest) {
+    my_impl::PersistentBST pbst = {4,2,6,1,3,5,7,8};
+    my_impl::PersistentBST pbst_old = {4,2,6,1,3,5,7};
+    my_impl::PersistentBST pbst_new = {4,2,6,1,3,5,7,8};
+    
+    pbst.undo();
+    EXPECT_TRUE(pbst == pbst_old);
+
+    pbst.redo();
+    EXPECT_TRUE(pbst == pbst_new);
 }
 
 int main(int argc, char **argv) {
