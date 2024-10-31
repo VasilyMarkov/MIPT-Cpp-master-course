@@ -37,9 +37,6 @@ class PersistentBST final {
             left_(other.left_), 
             right_(other.right_) {}
         
-        Node& operator=(const Node& other) {
-            Node(other) temp;
-        }
         
         void swap(Node& other) noexcept {
             std::swap(value_, other);
@@ -80,7 +77,6 @@ public:
     
     void insert(const T& value) 
     {
-        std::cout << "const T&" << std::endl;
         if(empty()) {
             root_ = std::make_shared<Node>(value);
             ++size_;
@@ -96,7 +92,6 @@ public:
 
     void insert(T&& value) 
     {
-        std::cout << "T&&" << std::endl;
         if(empty()) {
             root_ = std::make_shared<Node>(std::move(value));
             ++size_;
@@ -143,8 +138,6 @@ public:
 private:
     Node_ptr insertRecursive(Node_ptr node, const T& value) 
     {
-        std::cout << "const insert&" << std::endl;
-
         if(!node) return std::make_shared<Node>(value);   
 
         if(value < node->value_) 
@@ -162,7 +155,6 @@ private:
 
     Node_ptr insertRecursive(Node_ptr node, T&& value) 
     {
-        std::cout << "insert&&" << std::endl;
         if(!node) return std::make_shared<Node>(std::move(value));   
 
         if(value < node->value_) 

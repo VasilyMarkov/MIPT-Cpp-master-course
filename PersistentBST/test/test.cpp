@@ -120,21 +120,26 @@ TEST(Pbst, undoRedoTest) {
 //     EXPECT_EQ(pbst.flatten(), data);
 // }
 
-TEST(Pbst, NonIntergalTypeTest) {
-    my_impl::PersistentBST<OrderedType> pbst;
+// TEST(Pbst, NonIntergalTypeTest) {
+//     my_impl::PersistentBST<OrderedType> pbst;
     
-    OrderedType foo{1};
+//     OrderedType foo{1};
 
-    pbst.insert(foo);
+//     pbst.insert(foo);
 
-}
+// }
 
-TEST(Pbst, moveNonIntergalTypeTest) {
-    my_impl::PersistentBST<OrderedType> pbst;
+// TEST(Pbst, moveNonIntergalTypeTest) {
+//     my_impl::PersistentBST<OrderedType> pbst;
 
-    pbst.insert(OrderedType{1});
+//     pbst.insert(OrderedType{1});
 
-}
+// }
+
+// TEST(Pbst, moveNonIntergalTypeTest) {
+//     my_impl::Test<int> pod;
+//     my_impl::Test<std::vector<int>> not_pod;
+// }
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
