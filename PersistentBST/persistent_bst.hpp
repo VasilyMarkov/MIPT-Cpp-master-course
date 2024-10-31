@@ -95,21 +95,6 @@ public:
         ++size_;
     }
 
-    void insert(T&& value) 
-    {
-        if(empty()) {
-            root_ = std::make_shared<Node<T>>(std::move(value));
-            ++size_;
-            return;
-        }
-
-        temp_root_ = insertRecursive(root_, std::move(value));
-        std::swap(temp_root_, root_);
-        active_root_ = root_;
-
-        ++size_;
-    }
-
     void undo() noexcept
     {
         if(size_ > 1 && !undo_cnt_) 
@@ -153,23 +138,6 @@ private:
         else if(value > node->value_) 
         {
             auto new_right = insertRecursive(node->right_,value);
-            return std::make_shared<Node<T>>(node->value_, node->left_, new_right);
-        }
-        else return node;
-    }
-
-    Node_ptr insertRecursive(Node_ptr node, T&& value) 
-    {
-        if(!node) return std::make_shared<Node<T>>(std::move(value));   
-
-        if(value < node->value_) 
-        {
-            auto new_left = insertRecursive(node->left_, std::move(value));
-            return std::make_shared<Node<T>>(node->value_, new_left, node->right_);
-        }
-        else if(value > node->value_) 
-        {
-            auto new_right = insertRecursive(node->right_, std::move(value));
             return std::make_shared<Node<T>>(node->value_, node->left_, new_right);
         }
         else return node;
