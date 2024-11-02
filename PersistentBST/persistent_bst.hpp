@@ -36,7 +36,8 @@ class PersistentBST final
             right_(other.right_) {}
         
         
-        void swap(Node& other) noexcept {
+        void swap(Node& other) noexcept 
+        {
             std::swap(value_, other);
             std::swap(left_, other.left_);
             
@@ -128,7 +129,8 @@ public:
 
     bool empty() const noexcept { return size_ == 0; }
 
-    bool operator==(const PersistentBST& rhs) const noexcept {
+    bool operator==(const PersistentBST& rhs) const noexcept 
+    {
         return inorderEqual(active_root_, rhs.active_root_);
     }
     
@@ -150,7 +152,8 @@ private:
         else return node;
     }
 
-    Node_ptr searchRecursive(Node_ptr node, const T& value) {
+    Node_ptr searchRecursive(Node_ptr node, const T& value) 
+    {
         if(!node || value == node->value_) return node;
 
         if(value < node->value_) 
@@ -163,7 +166,8 @@ private:
         }
     }
 
-    Node_ptr removeRecursive(Node_ptr node, const T& value) {
+    Node_ptr removeRecursive(Node_ptr node, const T& value) 
+    {
         if (!node) {
             return nullptr;
         }
@@ -195,7 +199,8 @@ private:
         }
     }
 
-    Node_ptr findMin(Node_ptr node) const {
+    Node_ptr findMin(Node_ptr node) const 
+    {
         while (node->left_) {
             node = node->left_;
         }
@@ -247,7 +252,8 @@ template<template <typename> typename Cont, typename T>
 PersistentBST(const Cont<T>&) -> PersistentBST<T>;
 
 template<>
-class PersistentBST<int> {
+class PersistentBST<int> 
+{
     enum class lastOperation_t {INSERT, REMOVE};
 public:
     PersistentBST() {}
@@ -280,7 +286,8 @@ public:
         insertValue(value);
     }
 
-    void remove(int value) {
+    void remove(int value) 
+    {
         if(!main_data_.empty()) 
         {
             lastOperation = lastOperation_t::REMOVE;
@@ -294,7 +301,8 @@ public:
         }
     }
 
-    std::vector<int>::const_iterator search(int value) const  {
+    std::vector<int>::const_iterator search(int value) const  
+    {
         if(std::binary_search(std::begin(main_data_), std::end(main_data_), value)) 
         {
             return std::lower_bound(std::begin(main_data_), std::end(main_data_), value);
@@ -334,7 +342,8 @@ public:
 
     void print() const {my_impl::print(main_data_);}
 
-    bool operator==(const PersistentBST& rhs) const noexcept {
+    bool operator==(const PersistentBST& rhs) const noexcept 
+    {
         return main_data_ == rhs.main_data_;
     }
 

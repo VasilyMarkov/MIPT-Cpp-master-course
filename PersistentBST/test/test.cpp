@@ -89,6 +89,12 @@ TEST(Pbst, removeTest) {
     EXPECT_EQ(pbst.flatten(), result);
 }
 
+TEST(Pbst, searchTest) {
+    my_impl::PersistentBST<int> pbst = {3,1,2};
+    
+    EXPECT_EQ(*pbst.search(3), 3);
+}
+
 TEST(Pbst, equalTest) {
     my_impl::PersistentBST pbst1 = {3,1,2};
     my_impl::PersistentBST pbst2 = {3,1,2};
@@ -143,7 +149,7 @@ TEST(Pbst, undoRemoveTest) {
     EXPECT_TRUE(pbst == pbst_new);
 }
 
-TEST(Pbst, undoRedoTest) {
+TEST(Pbst, undoRedoTest1) {
     my_impl::PersistentBST pbst = {3,1,2,4};
     my_impl::PersistentBST pbst_old = {3,1,2,4};
     my_impl::PersistentBST pbst_old1 = {1,2};
@@ -153,10 +159,25 @@ TEST(Pbst, undoRedoTest) {
     EXPECT_TRUE(pbst == pbst_old);
     
     pbst.undo();
-    pbst.print();
     pbst.remove(3);
 
     EXPECT_TRUE(pbst == pbst_old1);
+}
+
+TEST(Pbst, undoRedoTest2) {
+    my_impl::PersistentBST pbst = {3,1,2,4};
+    my_impl::PersistentBST pbst_old = {3,1,2,4};
+    my_impl::PersistentBST pbst_old1 = {1,2};
+    
+    pbst.undo();
+    pbst.redo();
+    pbst.undo();
+    pbst.redo();
+    EXPECT_TRUE(pbst == pbst_old);
+
+    pbst.redo();
+    pbst.redo();
+    EXPECT_TRUE(pbst == pbst_old);
 }
 
 TEST(Pbst, NonIntTest) {
