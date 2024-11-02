@@ -43,7 +43,6 @@ public:
 };
 
 
-// template <std::totally_ordered T, bool = !(std::is_trivial_v<T> && std::is_standard_layout_v<T>)>
 template <std::totally_ordered T>
 class PersistentBST final {
     using Node_ptr = std::shared_ptr<Node<T>>;
@@ -83,12 +82,22 @@ public:
         temp_root_ = insertRecursive(root_, value);
         std::swap(temp_root_, root_);
         active_root_ = root_;
-
         ++size_;
     }
 
-    Node_ptr search(const T& value) {
+    Node_ptr search(const T& value) noexcept
+    {
         return searchRecursive(root_, value);
+    }
+
+    void remove(const T& value) 
+    {
+        if(!empty()) {
+            temp_root_ = removeRecursive(root_, value);
+            std::swap(temp_root_, root_);
+            active_root_ = root_;
+            --size_;
+        }
     }
 
     void undo() noexcept
@@ -150,6 +159,45 @@ private:
         {
             return searchRecursive(node->right_, value);
         }
+    }
+
+    Node_ptr removeRecursive(Node_ptr node, const T& value) {
+        if (!node) {
+            return nullptr;
+        }
+
+        if (value < node->value_) 
+        {
+            auto newLeft = removeRecursive(node->left_, value);
+            return std::make_shared<Node<T>>(node->value_, newLeft, node->right_);
+        } 
+        else if (value > node->value_) 
+        {
+            auto newRight = removeRecursive(node->right_, value);
+            return std::make_shared<Node<T>>(node->value_, node->left_, newRight);
+        } 
+        else {
+            if (!node->left_) 
+            {
+                return node->right_;
+            } 
+            else if (!node->right_) 
+            {
+                return node->left_;
+            } 
+            else 
+            {
+                auto minNode = findMin(node->right_);
+                return std::make_shared<Node<T>>(minNode->value_, node->left_, removeRecursive(node->right_, minNode->value_));
+            }
+        }
+    }
+
+    Node_ptr findMin(Node_ptr node) const {
+        while (node->left_) {
+            node = node->left_;
+        }
+        return node;
     }
 
     void traversalFlat(Node_ptr root, std::vector<T>& vec) 

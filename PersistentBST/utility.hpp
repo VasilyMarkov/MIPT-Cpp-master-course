@@ -17,9 +17,9 @@ concept HasBeginEnd = requires (Cont container)
 template <typename T>
 void print(const std::vector<T>& vector) {
     for(auto&& el:vector) {
-        std::cout << el << ' ';
+        std::cout << el << std::endl;
     }
-    std::cout << std::endl;
+    // std::cout << std::endl;
 }
 
 template <typename T, typename U>

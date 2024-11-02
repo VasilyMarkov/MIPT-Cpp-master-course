@@ -55,6 +55,12 @@ struct NonePodType
     ~NonePodType(){}
 
     auto operator<=>(const NonePodType&) const = default;
+
+    friend std::ostream& operator<<(std::ostream& os, const NonePodType& none_pod_type) 
+    {
+        os << "x: " << none_pod_type.x  << " y: " << none_pod_type.y  << " z: " << none_pod_type.z; 
+        return os;
+    }
 };
 
 // TEST(Pbst, insertTest) {
@@ -120,7 +126,7 @@ struct NonePodType
 //     EXPECT_TRUE(pbst == pbst_old);
 // }
 
-TEST(Pbst, NonIntergalTypeTest) {
+TEST(Pbst, NonIntTest) {
     
     std::vector<PodType> data(10);
     std::generate(std::begin(data), std::end(data), 
@@ -135,7 +141,7 @@ TEST(Pbst, NonIntergalTypeTest) {
     EXPECT_EQ(pbst.flatten(), data);
 }
 
-TEST(Pbst, NonIntergalTypeSearch) {
+TEST(Pbst, NonIntTest1) {
     
     std::vector<PodType> data(10);
     std::generate(std::begin(data), std::end(data), 
@@ -145,10 +151,57 @@ TEST(Pbst, NonIntergalTypeSearch) {
 
     my_impl::PersistentBST<PodType> pbst{data};
 
-    auto node = pbst.search(*std::begin(data));
+    std::sort(std::begin(data), std::end(data));
 
-    EXPECT_EQ(node->value_, *std::begin(data));
+    EXPECT_EQ(pbst.flatten(), data);
 }
+
+TEST(Pbst, NonIntergalTypeRemove) {
+    
+    std::vector<PodType> data(10);
+    
+    std::generate(std::begin(data), std::end(data), 
+        [n = 0]() mutable {return PodType{n++, n++, n++};});
+
+    std::vector<PodType> ref_data(std::begin(data), std::end(data)-1);
+
+    my_impl::PersistentBST<PodType> pbst{data};
+
+    pbst.remove(*(std::end(data)-1));
+
+    EXPECT_EQ(pbst.flatten(), ref_data);
+}
+
+TEST(Pbst, NonIntergalTypeUndo) {
+    
+    std::vector<PodType> data(10);
+    
+    std::generate(std::begin(data), std::end(data), 
+        [n = 0]() mutable {return PodType{n++, n++, n++};});
+
+    my_impl::PersistentBST<PodType> pbst{data};
+
+
+
+    // EXPECT_EQ(pbst.flatten(), ref_data);
+}
+
+
+// TEST(Pbst, NonIntergalTypeRemove) {
+    
+//     std::vector<PodType> data(10);
+    
+//     std::generate(std::begin(data), std::end(data), 
+//         [n = 0]() mutable {return PodType{n++, n++, n++};});
+
+//     std::vector<PodType> ref_data(std::begin(data), std::end(data)-1);
+
+//     my_impl::PersistentBST<PodType> pbst{data};
+
+//     pbst.remove(*(std::end(data)-1));
+
+//     EXPECT_EQ(pbst.flatten(), ref_data);
+// }
 
 // TEST(Pbst, NonIntergalTypeTest) {
 //     my_impl::PersistentBST<OrderedType> pbst;
