@@ -7,8 +7,6 @@ else()
     message("SANITIZE: OFF")
 endif() 
 
-add_executable(PersistentBST main.cpp)
-
 if(TESTS)
    find_package(GTest REQUIRED)
    add_subdirectory(test)

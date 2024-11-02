@@ -34,8 +34,8 @@ static void countingSort(Iter begin, Iter end, int exp)
 
     std::transform(std::cbegin(count)+1, std::cend(count), std::cbegin(count), std::begin(count)+1, std::plus<>{});
 
-    auto rbegin = std::make_reverse_iterator(begin);
-    auto rend = std::make_reverse_iterator(end);
+    // auto rbegin = std::make_reverse_iterator(begin);
+    // auto rend = std::make_reverse_iterator(end);
 
     // for(auto it = rbegin; it != rend; ++it) {
     //     int index = (*it / exp) % 10;

@@ -7,6 +7,13 @@
 
 namespace my_impl {
 
+template<typename Cont>
+concept HasBeginEnd = requires (Cont container) 
+{
+    { container.begin() } -> std::input_iterator;
+    { container.end() } -> std::input_iterator;
+};
+
 template <typename T>
 void print(const std::vector<T>& vector) {
     for(auto&& el:vector) {
@@ -22,6 +29,7 @@ void print(const std::unordered_map<T, U>& map) {
     }
     std::cout << std::endl;
 }
+
 
 }//namespace app
 
