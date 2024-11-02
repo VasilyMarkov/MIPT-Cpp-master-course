@@ -34,7 +34,6 @@ class PersistentBST final
         {
             std::swap(value_, other);
             std::swap(left_, other.left_);
-            
         }
     private:
         T value_;
@@ -82,7 +81,7 @@ public:
         ++size_;
     }
 
-    Node_ptr search(const T& value) noexcept
+    Node_ptr search(const T& value) const noexcept
     {
         return searchRecursive(root_, value);
     }
@@ -146,7 +145,7 @@ private:
         else return node;
     }
 
-    Node_ptr searchRecursive(Node_ptr node, const T& value) 
+    Node_ptr searchRecursive(Node_ptr node, const T& value) const
     {
         if(!node || value == node->value_) return node;
 
@@ -193,7 +192,7 @@ private:
         }
     }
 
-    Node_ptr findMin(Node_ptr node) const 
+    Node_ptr findMin(Node_ptr node) const noexcept
     {
         while (node->left_) {
             node = node->left_;
@@ -201,7 +200,7 @@ private:
         return node;
     }
 
-    void traversalFlat(Node_ptr root, std::vector<T>& vec) 
+    void traversalFlat(Node_ptr root, std::vector<T>& vec) const
     {
         if (!root) return;
 
@@ -210,7 +209,7 @@ private:
         traversalFlat(root->right_, vec);
     } 
 
-    void dump(Node_ptr root, const std::string& prefix = "", bool isTail = true) 
+    void dump(Node_ptr root, const std::string& prefix = "", bool isTail = true) const
     {
         if (!root) {
             std::cout << prefix << (isTail ? "└──" : "├──") << "n" << std::endl;

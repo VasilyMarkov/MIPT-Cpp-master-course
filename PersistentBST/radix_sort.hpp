@@ -45,7 +45,15 @@ void countingSort(Iter begin, Iter end, int exp)
 
 }
 
-template<std::contiguous_iterator Iter>
+template<typename T>
+concept VectorIntIterator = requires(T it) {
+    typename std::iterator_traits<T>::value_type;
+    requires std::same_as<typename std::iterator_traits<T>::value_type, int>;
+    requires std::same_as<typename std::iterator_traits<T>::iterator_category, std::random_access_iterator_tag>;
+};
+
+
+template<VectorIntIterator Iter>
 void radixSort(Iter begin, Iter end) 
 {
     int max = getMax(begin, end);
