@@ -21,7 +21,7 @@ int getMax(Iter begin, Iter end)
 }
 
 template <typename Iter>
-static void countingSort(Iter begin, Iter end, int exp) 
+void countingSort(Iter begin, Iter end, int exp) 
 {
     std::vector<int> output(std::distance(begin, end));
     std::vector<int> count(10, 0);
