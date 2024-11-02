@@ -29,12 +29,6 @@ class PersistentBST final
             value_(value), 
             left_(left), 
             right_(right) {}
-
-        Node(const Node& other): 
-            value_(other.value_), 
-            left_(other.left_), 
-            right_(other.right_) {}
-        
         
         void swap(Node& other) noexcept 
         {
