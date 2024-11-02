@@ -1,5 +1,6 @@
-# String implementation
-This project consists a string_twine class that concatenate at O(logN). 
+# Persistent Binary search tree
+This project contains a Persistent Binary search tree implementation that supports one-time operations undo and redo.
+Also for the int type an optimized version flat tree.  
 
 ## Dependencies and requirements
 > Project requires at least C++20. \
@@ -11,7 +12,7 @@ git clone https://github.com/VasilyMarkov/my_impl_cpp.git
 cd my_impl_cpp
 ```
 ```bash
-cd string_twine
+cd PersistentBST
 ```
 ### Build
 #### Release

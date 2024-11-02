@@ -50,9 +50,7 @@ struct PodType final
 struct NonePodType
 {
     int x{}, y{}, z{};
-    
-    virtual void foo() const noexcept;
-    ~NonePodType(){}
+    virtual ~NonePodType(){}
 
     auto operator<=>(const NonePodType&) const = default;
 
@@ -63,68 +61,103 @@ struct NonePodType
     }
 };
 
-// TEST(Pbst, insertTest) {
-//     my_impl::PersistentBST<int> pbst;
-//     pbst.insert(3);
-//     pbst.insert(1);
-//     pbst.insert(2);
+TEST(Pbst, insertTest) {
+    my_impl::PersistentBST<int> pbst;
+    pbst.insert(3);
+    pbst.insert(1);
+    pbst.insert(2);
     
-//     auto flatten = pbst.flatten();
-//     std::vector result = {1,2,3};
-//     EXPECT_EQ(flatten, result);
-// }
+    std::vector result = {1,2,3};
+    EXPECT_EQ(pbst.flatten(), result);
+}
 
-// TEST(Pbst, initializer_listTest) {
-//     my_impl::PersistentBST pbst = {3,1,2};
+TEST(Pbst, initializer_listTest) {
+    my_impl::PersistentBST pbst = {3,1,2};
 
-//     auto flatten = pbst.flatten();
-//     std::vector result = {1,2,3};
-//     EXPECT_EQ(flatten, result);
-// }
+    std::vector result = {1,2,3};
+    EXPECT_EQ(pbst.flatten(), result);
+}
 
-// TEST(Pbst, equalTest) {
-//     my_impl::PersistentBST pbst1 = {3,1,2};
-//     my_impl::PersistentBST pbst2 = {3,1,2};
-//     EXPECT_TRUE(pbst1 == pbst2);
+TEST(Pbst, removeTest) {
+    my_impl::PersistentBST<int> pbst = {3,1,2};
+    pbst.insert(4);
 
-//     my_impl::PersistentBST pbst3 = {1,2,3};
-//     EXPECT_TRUE(pbst1 == pbst3);
+    pbst.remove(4);
+    pbst.remove(1);
     
-//     my_impl::PersistentBST<int> pbst4;
-//     my_impl::PersistentBST<int> pbst5;
-//     EXPECT_FALSE(pbst1 == pbst4);
-//     EXPECT_TRUE(pbst4 == pbst5);
-// }
+    std::vector result = {2,3};
+    EXPECT_EQ(pbst.flatten(), result);
+}
 
-// TEST(Pbst, bigDataTest) {
+TEST(Pbst, equalTest) {
+    my_impl::PersistentBST pbst1 = {3,1,2};
+    my_impl::PersistentBST pbst2 = {3,1,2};
+    EXPECT_TRUE(pbst1 == pbst2);
 
-//     const size_t SIZE = 1e3;
-
-//     std::random_device rd; 
-//     std::mt19937 gen(rd()); 
-//     std::uniform_int_distribution<> distrib(1, SIZE);
-
-//     std::vector<int> data(SIZE);
-//     std::generate(std::begin(data), std::end(data), 
-//         [&distrib, &gen](){ return distrib(gen); });
-
-//     std::set sort_data(std::begin(data), std::end(data));
-//     my_impl::PersistentBST pbst = data;
-
-//     std::vector out_data(std::begin(sort_data), std::end(sort_data));
-
-//     EXPECT_EQ(pbst.flatten(), out_data);
-// }
-
-// TEST(Pbst, undoRedoTest) {
-//     my_impl::PersistentBST pbst = {4,2,6,1,3,5,7,8};
-//     my_impl::PersistentBST pbst_old = {4,2,6,1,3,5,7};
-//     my_impl::PersistentBST pbst_new = {4,2,6,1,3,5,7,8};
+    my_impl::PersistentBST pbst3 = {1,2,3};
+    EXPECT_TRUE(pbst1 == pbst3);
     
-//     pbst.undo();
+    my_impl::PersistentBST<int> pbst4;
+    my_impl::PersistentBST<int> pbst5;
+    EXPECT_FALSE(pbst1 == pbst4);
+    EXPECT_TRUE(pbst4 == pbst5);
+}
+
+TEST(Pbst, bigDataTest) {
+
+    const size_t SIZE = 1e3;
+
+    std::random_device rd; 
+    std::mt19937 gen(rd()); 
+    std::uniform_int_distribution<> distrib(1, SIZE);
+
+    std::vector<int> data(SIZE);
+    std::generate(std::begin(data), std::end(data), 
+        [&distrib, &gen](){ return distrib(gen); });
+
+    std::set sort_data(std::begin(data), std::end(data));
+    my_impl::PersistentBST pbst = data;
+
+    std::vector out_data(std::begin(sort_data), std::end(sort_data));
+
+    EXPECT_EQ(pbst.flatten(), out_data);
+}
+
+TEST(Pbst, undoInsertTest) {
+    my_impl::PersistentBST pbst = {3,1,2};
+    my_impl::PersistentBST pbst_new = {3,1,2,4};
+    my_impl::PersistentBST pbst_old = {3,1};
+    pbst.undo();
+    pbst.undo();
+
+    EXPECT_TRUE(pbst == pbst_old);
+}
+
+TEST(Pbst, undoRemoveTest) {
+    my_impl::PersistentBST pbst = {3,1,2,4};
+    my_impl::PersistentBST pbst_new = {3,1,2,4};
+
+    pbst.remove(4);
+    pbst.undo();
+
+    EXPECT_TRUE(pbst == pbst_new);
+}
+
+TEST(Pbst, undoRedoTest) {
+    my_impl::PersistentBST pbst = {3,1,2,4};
+    my_impl::PersistentBST pbst_old = {3,1,2,4};
+    my_impl::PersistentBST pbst_old1 = {1,2};
     
-//     EXPECT_TRUE(pbst == pbst_old);
-// }
+    pbst.undo();
+    pbst.redo();
+    EXPECT_TRUE(pbst == pbst_old);
+    
+    pbst.undo();
+    pbst.print();
+    pbst.remove(3);
+
+    EXPECT_TRUE(pbst == pbst_old1);
+}
 
 TEST(Pbst, NonIntTest) {
     
@@ -172,7 +205,7 @@ TEST(Pbst, NonIntergalTypeRemove) {
     EXPECT_EQ(pbst.flatten(), ref_data);
 }
 
-TEST(Pbst, NonIntergalTypeUndo) {
+TEST(Pbst, NonIntergalTypeUndoRedo) {
     
     std::vector<PodType> data(10);
     
@@ -180,10 +213,24 @@ TEST(Pbst, NonIntergalTypeUndo) {
         [n = 0]() mutable {return PodType{n++, n++, n++};});
 
     my_impl::PersistentBST<PodType> pbst{data};
+ 
 
+    auto value1 = PodType{50, 50, 50}; 
+    auto value2 = PodType{52, 52, 52}; 
 
+    pbst.insert(value1);
+    pbst.undo();
+    EXPECT_EQ(pbst.flatten(), data);
 
-    // EXPECT_EQ(pbst.flatten(), ref_data);
+    pbst.redo();
+    pbst.remove(value1);
+    EXPECT_EQ(pbst.flatten(), data);
+
+    pbst.undo();
+    pbst.insert(value2);
+    data.push_back(value2);
+    EXPECT_EQ(pbst.flatten(), data);
+
 }
 
 

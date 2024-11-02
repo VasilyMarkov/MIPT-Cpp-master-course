@@ -14,38 +14,40 @@
 namespace my_impl
 {
 
-template <typename T>
-class Node final {
-    using Node_ptr = std::shared_ptr<Node>;
-public:
-    explicit Node(T value) noexcept: value_(value) {}
-    
-    Node(T value, Node_ptr left, Node_ptr right) noexcept:
-        value_(value), 
-        left_(left), 
-        right_(right) {}
-
-    Node(const Node& other): 
-        value_(other.value_), 
-        left_(other.left_), 
-        right_(other.right_) {}
-    
-    
-    void swap(Node& other) noexcept {
-        std::swap(value_, other);
-        std::swap(left_, other.left_);
-        
-    }
-
-    T value_;
-    Node_ptr left_;
-    Node_ptr right_;
-};
-
-
 template <std::totally_ordered T>
-class PersistentBST final {
-    using Node_ptr = std::shared_ptr<Node<T>>;
+class PersistentBST final 
+{
+    class Node;
+    using Node_ptr = std::shared_ptr<Node>;
+
+    class Node final 
+    {
+    public:
+        explicit Node(T value) noexcept: value_(value) {}
+        
+        Node(T value, Node_ptr left, Node_ptr right) noexcept:
+            value_(value), 
+            left_(left), 
+            right_(right) {}
+
+        Node(const Node& other): 
+            value_(other.value_), 
+            left_(other.left_), 
+            right_(other.right_) {}
+        
+        
+        void swap(Node& other) noexcept {
+            std::swap(value_, other);
+            std::swap(left_, other.left_);
+            
+        }
+    private:
+        T value_;
+        Node_ptr left_;
+        Node_ptr right_;
+
+        friend class PersistentBST;
+    };
 public:
     PersistentBST() {}
     explicit PersistentBST(Node_ptr new_root) noexcept: root_(new_root) {}
@@ -74,7 +76,7 @@ public:
     void insert(const T& value) 
     {
         if(empty()) {
-            root_ = std::make_shared<Node<T>>(value);
+            root_ = std::make_shared<Node>(value);
             ++size_;
             return;
         }
@@ -109,7 +111,7 @@ public:
         } 
     }
 
-    void redo() noexcept { if(size_ >= 2) active_root_ = root_; }
+    void redo() noexcept { active_root_ = root_; --undo_cnt_;}
 
     void print() 
     {
@@ -133,17 +135,17 @@ public:
 private:
     Node_ptr insertRecursive(Node_ptr node, const T& value) 
     {
-        if(!node) return std::make_shared<Node<T>>(value);   
+        if(!node) return std::make_shared<Node>(value);   
 
         if(value < node->value_) 
         {
             auto new_left = insertRecursive(node->left_,value);
-            return std::make_shared<Node<T>>(node->value_, new_left, node->right_);
+            return std::make_shared<Node>(node->value_, new_left, node->right_);
         }
         else if(value > node->value_) 
         {
             auto new_right = insertRecursive(node->right_,value);
-            return std::make_shared<Node<T>>(node->value_, node->left_, new_right);
+            return std::make_shared<Node>(node->value_, node->left_, new_right);
         }
         else return node;
     }
@@ -169,12 +171,12 @@ private:
         if (value < node->value_) 
         {
             auto newLeft = removeRecursive(node->left_, value);
-            return std::make_shared<Node<T>>(node->value_, newLeft, node->right_);
+            return std::make_shared<Node>(node->value_, newLeft, node->right_);
         } 
         else if (value > node->value_) 
         {
             auto newRight = removeRecursive(node->right_, value);
-            return std::make_shared<Node<T>>(node->value_, node->left_, newRight);
+            return std::make_shared<Node>(node->value_, node->left_, newRight);
         } 
         else {
             if (!node->left_) 
@@ -188,7 +190,7 @@ private:
             else 
             {
                 auto minNode = findMin(node->right_);
-                return std::make_shared<Node<T>>(minNode->value_, node->left_, removeRecursive(node->right_, minNode->value_));
+                return std::make_shared<Node>(minNode->value_, node->left_, removeRecursive(node->right_, minNode->value_));
             }
         }
     }
@@ -246,7 +248,7 @@ PersistentBST(const Cont<T>&) -> PersistentBST<T>;
 
 template<>
 class PersistentBST<int> {
-    using Node_ptr = std::shared_ptr<Node<int>>;
+    enum class lastOperation_t {INSERT, REMOVE};
 public:
     PersistentBST() {}
 
@@ -255,7 +257,8 @@ public:
     {
         main_data_.reserve(cont.size());
 
-        for(auto&& el:cont) {
+        for(auto&& el:cont) 
+        {
             insert(el);
         }
     }
@@ -264,37 +267,67 @@ public:
     {
         main_data_.reserve(list.size());
 
-        for(auto&& el:list) {
+        for(auto&& el:list) 
+        {
             insert(el);
         }
     }
     
     void insert(int value)
     {
-        if(main_data_.empty()) {
-            main_data_.push_back(value);
-            current_value_ = value;
-            return;
-        }
+        lastOperation = lastOperation_t::INSERT;
 
-        prev_value_ = current_value_;
+        insertValue(value);
+    }
 
-        if(std::find(std::begin(main_data_), std::end(main_data_), value) == std::end(main_data_))
+    void remove(int value) {
+        if(!main_data_.empty()) 
         {
-            main_data_.push_back(value);
-            radixSort(std::begin(main_data_), std::end(main_data_));
-            
-            current_value_ = value;
+            lastOperation = lastOperation_t::REMOVE;
+
+            if(std::binary_search(std::begin(main_data_), std::end(main_data_), value)) 
+            {
+                current_value_ = value;
+                removeValue(value);
+                radixSort(std::begin(main_data_), std::end(main_data_));
+            }
         }
     }
 
-    void undo() {
-        auto current_value = *std::lower_bound(std::begin(main_data_), std::end(main_data_), current_value_);
-        std::swap(current_value, *(std::end(main_data_)-1));
-        main_data_[main_data_.size()-1] = prev_value_;
-        // std::cout << main_data_.size() << std::endl;
-        print();
-        // insert(prev_value_);
+    std::vector<int>::const_iterator search(int value) const  {
+        if(std::binary_search(std::begin(main_data_), std::end(main_data_), value)) 
+        {
+            return std::lower_bound(std::begin(main_data_), std::end(main_data_), value);
+        }
+    }
+
+    void undo() 
+    {
+        if(!main_data_.empty() && !undo_cnt_) 
+        { 
+            if(lastOperation == lastOperation_t::INSERT) 
+            {
+                removeValue(current_value_);
+            }
+            else 
+            {
+                insertValue(current_value_);
+            }
+            ++undo_cnt_;
+        }
+    }
+
+    void redo() 
+    {
+        if(lastOperation == lastOperation_t::INSERT) 
+        {
+            insertValue(current_value_);
+        }
+        else 
+        {
+            removeValue(current_value_);
+        }
+        --undo_cnt_;
     }
 
     std::vector<int> flatten() const { return main_data_; }
@@ -306,9 +339,36 @@ public:
     }
 
 private:
+    void insertValue(int value) 
+    {
+        if(main_data_.empty()) 
+        {
+            main_data_.push_back(value);
+            current_value_ = value;
+            return;
+        }
+
+        prev_value_ = current_value_;
+
+        if(std::find(std::begin(main_data_), std::end(main_data_), value) == std::end(main_data_))
+        {
+            main_data_.push_back(value);
+            radixSort(std::begin(main_data_), std::end(main_data_));
+            current_value_ = value;
+        }
+    }
+    void removeValue(int value) 
+    {
+        auto current_value_it = std::lower_bound(std::begin(main_data_), std::end(main_data_), value);
+        std::swap(*current_value_it, main_data_.back());
+        main_data_.pop_back();
+    }
+
     std::vector<int> main_data_;
-    int prev_value_;
-    int current_value_;
+    int prev_value_{};
+    int current_value_{};
+    lastOperation_t lastOperation;
+    size_t undo_cnt_{};
 };
 
 } // namespace my_impl
