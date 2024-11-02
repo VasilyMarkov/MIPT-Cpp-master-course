@@ -17,4 +17,6 @@ int main() {
 ```
 ### Explanation
 
-Pursuant to paragraph <strong>6.5.4</strong>. Parentheses prevent argument-dependent lookup
+Pursuant to paragraph <strong>6.5.4</strong>. Parentheses prevent argument-dependent lookup.
+So, `(foo)` is `( expression )`, not unqualified-id, therefore ADL doesn't apply. A parenthesized unqualified-id is no longer an unqualified-id. 
+That will be constructed using regular unqualified lookup, not argument-dependent lookup.
