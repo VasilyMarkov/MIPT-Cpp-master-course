@@ -34,7 +34,7 @@ In general `new` can be an expression with fulfillment of some conditions. \
 >a new-expression (7.6.2.8), unless the selected allocation function is a replaceable global allocation
 function (17.6.3.2, 17.6.3.3) and the allocated storage is <strong>deallocated </strong>within the evaluation of E;
 
-But in our case there is no deallocation, which means that `new` cannot be considered a constant expression and accordingly assignment to the enumerators should not be compiled.
+But in our case there is no deallocation, which means that `new` cannot be considered a constant expression and accordingly assignment to the bit-fields and enumerators should not be compiled.
 
 
 That's what gcc says:
