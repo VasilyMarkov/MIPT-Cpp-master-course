@@ -3,7 +3,7 @@
 
 ```C++
 struct S {
-    int a: *new int{1};
+    int: *new int{0};
 };
 
 enum E {
