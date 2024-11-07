@@ -38,9 +38,9 @@ But in our case there is no deallocation, which means that `new` cannot be consi
 
 
 That's what gcc says:
-```
-'*(operator new(4), ((true, (((*(int*)<anonymous>) = 1), (<anonymous> = false))), ((int*)<anonymous>)))' is not a constant expression because allocated storage has not been deallocated
-```
+
+>'*(operator new(4), ((true, (((*(int*)<anonymous>) = 1), (<anonymous> = false))), ((int*)<anonymous>)))' is not a constant expression because allocated storage has not been deallocated
+
 
 ## Conclusion
 GCC is right, Clang is wrong.
