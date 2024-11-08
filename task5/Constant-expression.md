@@ -1,5 +1,5 @@
 # Constant Expressions
-## Example:
+## Example
 
 ```C++
 struct S {
