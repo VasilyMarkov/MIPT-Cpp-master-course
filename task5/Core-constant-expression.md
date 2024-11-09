@@ -35,9 +35,9 @@ It remains to understand whether this expression is a type of constant expressio
 
 `const int& b` in the `Type` struct is being initialized with a temporary object, which is not allowed in a constant expression context.  
 <strong>7.7.12</strong>:
-```
-A constant expression is either a glvalue core constant expression that refers to an entity that is a permitted result of a constant expression (as defined below), or a prvalue core constant expression whose value satisfies the following constraints: ...
-```
+
+>A constant expression is either a glvalue core constant expression that refers to an entity that is a permitted result of a constant expression (as defined below), or a prvalue core constant expression whose value satisfies the following constraints: ...
+
 
 The dangling reference doesn't satisfies these requirements.
 ## Conclusion
