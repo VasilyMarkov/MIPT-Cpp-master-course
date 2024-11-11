@@ -296,10 +296,8 @@ public:
 
     std::vector<int>::const_iterator search(int value) const  
     {
-        if(std::binary_search(std::begin(main_data_), std::end(main_data_), value)) 
-        {
-            return std::lower_bound(std::begin(main_data_), std::end(main_data_), value);
-        }
+        auto find_value = std::lower_bound(std::begin(main_data_), std::end(main_data_), value);
+        if(*find_value == value) return find_value;
     }
 
     void undo() 
