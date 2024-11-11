@@ -42,4 +42,7 @@ It remains to understand whether this expression is a type of constant expressio
 The dangling reference doesn't satisfies these requirements.
 ## Conclusion
 
-Different compiler behavior is observed because clang decided to execute the function in run time and gcc in compile time. If you force both compilers to execute the function in compile time, they will both generate an error that the reference to the temporary object is not a constant expression.
+Different compiler behavior is observed because clang decided to execute the function in run time and gcc in compile time. 
+
+In other words gcc constexpr executes as consteval, which is not correct.
+
