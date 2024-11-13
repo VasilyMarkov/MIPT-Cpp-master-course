@@ -1,37 +1,37 @@
 #ifndef TUPLE_H
 #define TUPLE_H
+
 #include <iostream>
 #include <type_traits>
+#include <boost/mpl/vector.hpp>
+#include <boost/mpl/sort.hpp>
+#include <boost/mpl/less.hpp>
+#include <boost/mpl/for_each.hpp>
+#include <boost/mpl/placeholders.hpp>
+#include <boost/mpl/size_t.hpp>
 
-namespace my_impl
-{
+namespace mpl = boost::mpl;
 
-struct typeLess {
-    template<typename T, typename U>
-    struct compare: std::integral_constant<bool, 
-        !std::is_same_v<T, U> && (sizeof(T) < sizeof(U))> {};
+template <typename T>
+struct sizeofType : mpl::size_t<sizeof(T)> {};
+
+template <typename... Ts>
+struct Tuple {
+    using Vec = mpl::vector<Ts...>;
+    using sorted = typename mpl::sort<Vec, mpl::less<sizeofType<mpl::_1>, sizeofType<mpl::_2>>>::type;
 };
 
-template<typename T, typename U>
-void compareTypes() 
-{
-    if constexpr(typeLess::compare<T, U>::value) {
-        std::cout << "T is less than U" << std::endl;
+struct printType {
+    template <typename T>
+    void operator()(T) const {
+        std::cout << typeid(T).name() << std::endl;
     }
-    else {
-        std::cout << "U is less than T" << std::endl;
-    }
+};
+
+template <typename Tuple>
+void printSortedTypes() {
+    using SortedTypes = typename Tuple::sorted;
+    boost::mpl::for_each<SortedTypes>(printType());
 }
-
-template<typename... Args>
-class Tuple
-{
-public:
-    Tuple(){}
-private:
-
-};
-
-} // namespace my_impl
 
 #endif //TUPLE_H
