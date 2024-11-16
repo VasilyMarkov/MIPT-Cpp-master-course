@@ -1,10 +1,11 @@
 #include "physical-quantities.hpp"
 
 int main() {
-    Speed unit1(2.0);
-    Current unit2(3.0);
-    auto product = unit1*unit2;
-    std::cout << typeid(product).name() << std::endl;
-    std::cout << product.value << std::endl;
-    product.print();
+    Time t(10.0);
+    Current I(0.1);
+    Resistance R(150.0);
+
+    auto Q = I*I*R*t;
+
+    Q.print();
 }
