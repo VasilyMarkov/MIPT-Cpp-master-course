@@ -2,7 +2,7 @@
 
 if [ -d "build" ]; then
   cd build
-  ./Tuple $@
+  ./Physical-quantities $@
 else
   echo "Directory build doesn't exists."
 fi
