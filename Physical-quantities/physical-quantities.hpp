@@ -28,8 +28,8 @@ void print_tuple_impl(const std::tuple<Args...>& tuple, std::index_sequence<Is..
 }
 
 template<typename... Args>
-void print_tuple(const std::tuple<Args...>& t) {
-    print_tuple_impl(t, std::make_index_sequence<sizeof...(Args)>{});
+void print_tuple(const std::tuple<Args...>& tuple) {
+    print_tuple_impl(tuple, std::make_index_sequence<sizeof...(Args)>{});
 }
 /*****************************************************************/
 
@@ -43,7 +43,7 @@ template<typename UnitT>
 struct Value {
     using Unit = UnitT;
     double value = 0.0;
-    explicit Value(double d): value(d) {}
+    explicit Value(double val): value(val) {}
 
     void print() {
         std::cout << "Value: " << value << std::endl;
@@ -53,21 +53,21 @@ struct Value {
 };
 
 template<typename Tuple1, typename Tuple2, typename BinaryOp, std::size_t... Is>
-constexpr auto tuple_bin_op_impl(Tuple1 t1, Tuple2 t2, BinaryOp op, std::index_sequence<Is...>) {
-    return std::make_tuple((op(std::get<Is>(t1), std::get<Is>(t2)))...);
+constexpr auto tuple_bin_op_impl(Tuple1 tuple1, Tuple2 tuple2, BinaryOp op, std::index_sequence<Is...>) {
+    return std::make_tuple((op(std::get<Is>(tuple1), std::get<Is>(tuple2)))...);
 }
 
 template<typename Tuple1, typename Tuple2, typename BinaryOp>
-constexpr auto tuple_bin_op(Tuple1 t1, Tuple2 t2, BinaryOp op) {
-    return tuple_bin_op_impl(t1, t2, op, std::make_index_sequence<std::tuple_size_v<Tuple1>>{});
+constexpr auto tuple_bin_op(Tuple1 tuple1, Tuple2 tuple2, BinaryOp op) {
+    return tuple_bin_op_impl(tuple1, tuple2, op, std::make_index_sequence<std::tuple_size_v<Tuple1>>{});
 }
 
 template<typename Tuple, std::size_t N>
-constexpr auto pad_tuple(Tuple t) {
+constexpr auto pad_tuple(Tuple tuple) {
     if constexpr (N == 0) {
-        return t;
+        return tuple;
     } else {
-        return pad_tuple<decltype(std::tuple_cat(t, std::make_tuple(0))), N - 1>(std::tuple_cat(t, std::make_tuple(0)));
+        return pad_tuple<decltype(std::tuple_cat(tuple, std::make_tuple(0))), N - 1>(std::tuple_cat(tuple, std::make_tuple(0)));
     }
 }
 
