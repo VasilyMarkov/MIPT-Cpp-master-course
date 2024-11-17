@@ -13,11 +13,11 @@
 namespace mpl = boost::mpl;
 
 template <typename T>
-struct sizeofType : mpl::size_t<sizeof(T)> {};
+struct sizeofType : mpl::size_t<sizeof(std::remove_reference_t<T>)> {};
 
 template <typename... Ts>
 struct Tuple {
-    using Vec = mpl::vector<Ts...>;
+    using Vec = mpl::vector<std::type_identity<Ts>...>;
     using sorted = typename mpl::sort<Vec, mpl::less<sizeofType<mpl::_1>, sizeofType<mpl::_2>>>::type;
 };
 
