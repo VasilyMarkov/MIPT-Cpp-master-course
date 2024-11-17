@@ -101,7 +101,7 @@ constexpr auto operator*(Value<Unit<Args1...>> val1, Value<Unit<Args2...>> val2)
 
 template<int... Args1, int... Args2>
 constexpr auto operator/(Value<Unit<Args1...>> val1, Value<Unit<Args2...>> val2) {
-    return Value<decltype(sum_dims(val1, val2, std::minus<>()))>(val1.value / val2.value);
+    return Value<decltype(op_dims(val1, val2, std::minus<>()))>(val1.value / val2.value);
 }
 
 using Distance      =   Value<Unit<1,0,0>>;
