@@ -104,16 +104,15 @@ constexpr auto operator/(Value<Unit<Args1...>> val1, Value<Unit<Args2...>> val2)
     return Value<decltype(sum_dims(val1, val2, std::minus<>()))>(val1.value / val2.value);
 }
 
-using Distance = Unit<1,0,0>;
-using Mass = Unit<0,1,0>;
-using Time = Value<Unit<0,0,1>>;
-
-using Velocity = Value<Unit<1,0,-1>>;
-using Acceleration = Value<Unit<1,0,-2>>;
-using Force = Value<Unit<1,1,-2>>;
-using Pressure = Value<Unit<-1,1,-2>>;
-using Joule = Value<Unit<-1,1,-2>>;
-using Current = Value<Unit<0,0,-1,1>>;
-using Resistance = Value<Unit<2,1,-1,-2>>;
+using Distance      =   Value<Unit<1,0,0>>;
+using Mass          =   Value<Unit<0,1,0>>;
+using Time          =   Value<Unit<0,0,1>>;
+using Velocity      =   Value<Unit<1,0,-1>>;
+using Acceleration  =   Value<Unit<1,0,-2>>;
+using Force         =   Value<Unit<1,1,-2>>;
+using Pressure      =   Value<Unit<-1,1,-2>>;
+using Joule         =   Value<Unit<-1,1,-2>>;
+using Current       =   Value<Unit<0,0,-1,1>>;
+using Resistance    =   Value<Unit<2,1,-1,-2>>;
 
 #endif //PHYSICAL_QUANTITIES_H
