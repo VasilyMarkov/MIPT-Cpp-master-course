@@ -9,8 +9,10 @@ int main() {
     using Tuple2 = Tuple<int, int, short>;
     using Tuple3 = Tuple<int, int&, int&&>;
     using Tuple4 = Tuple<>;
-    using Tuple5 = Tuple<Base, Derived, Payload>;
-    using Tuple6 = Tuple<decltype([](){}), void, char>;
+    using Tuple5 = Tuple<Payload, Base, Derived>;
+    using Tuple6 = Tuple<const int, const volatile int>;
+    using Tuple7 = Tuple<const volatile int, const int, const int&>;
+
 
     printSortedTypes<Tuple1>();
     std::cout << std::endl;
@@ -23,5 +25,8 @@ int main() {
     printSortedTypes<Tuple5>();
     std::cout << std::endl;
     printSortedTypes<Tuple6>();
+    std::cout << std::endl;
+    printSortedTypes<Tuple7>();
+    std::cout << std::endl;
 
 }
