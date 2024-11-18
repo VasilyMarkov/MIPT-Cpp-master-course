@@ -12,6 +12,8 @@
 #include <boost/type_traits/remove_reference.hpp>
 #include <boost/type_index.hpp>
 #include <boost/type_traits/add_pointer.hpp>
+#include <boost/type_traits/remove_pointer.hpp>
+
 
 namespace mpl = boost::mpl;
 
@@ -26,7 +28,7 @@ struct Tuple {
 
 template <typename T>
 void printType() {
-    std::cout << boost::typeindex::type_id<T>().pretty_name() << std::endl;
+    std::cout << boost::typeindex::type_id<typename boost::remove_pointer<T>::type>().pretty_name() << std::endl;
 }
 
 template <typename Tuple>
