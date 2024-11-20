@@ -111,7 +111,7 @@ using Velocity      =   Value<Unit<1,0,-1>>;
 using Acceleration  =   Value<Unit<1,0,-2>>;
 using Force         =   Value<Unit<1,1,-2>>;
 using Pressure      =   Value<Unit<-1,1,-2>>;
-using Joule         =   Value<Unit<2,1,-2,0>>;
+using Energy        =   Value<Unit<2,1,-2,0>>;
 using Current       =   Value<Unit<0,0,-1,1>>;
 using Resistance    =   Value<Unit<2,1,-1,-2>>;
 

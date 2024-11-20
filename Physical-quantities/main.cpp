@@ -6,6 +6,13 @@ int main() {
     Resistance R(150.0);
 
     auto Q = I*I*R*t;
-    std::cout << std::boolalpha << std::is_same_v<decltype(Q), Joule> << std::endl;
+    std::cout << std::boolalpha << std::is_same_v<decltype(Q), Energy> << std::endl;
     Q.print();
+
+
+
+    Value<Unit<1,1>> value1(2.0);
+    Value<Unit<>> value2(3.0);
+    auto pr = value1*value2;
+    pr.print();
 }
