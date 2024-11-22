@@ -1,6 +1,5 @@
 # Physical quantities
-This project contains a Persistent Binary search tree implementation that supports one-time operations undo and redo.
-Also for the int type an optimized version flat tree.  
+This compile time small library for product physical quantities.
 
 ## Dependencies and requirements
 > Project requires at least C++20. 

@@ -12,7 +12,7 @@ int main() {
 
 
     Value<Unit<1,1>> value1(2.0);
-    Value<Unit<>> value2(3.0);
-    auto pr = value1*value2;
+    Value<Unit<1,1,0,2>> value2(3.0);
+    auto pr = value1/value2;
     pr.print();
 }
