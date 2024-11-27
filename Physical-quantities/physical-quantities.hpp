@@ -7,6 +7,7 @@
 #include <utility>
 #include <unordered_map>
 #include <algorithm>
+
 namespace 
 {
 /*****************************UTILITY*****************************/
@@ -43,7 +44,6 @@ template<typename UnitT>
 struct Value {
     using Unit = UnitT;
     double value = 0.0;
-    explicit Value(double val): value(val) {}
 
     void print() {
         std::cout << "Value: " << value << std::endl;
